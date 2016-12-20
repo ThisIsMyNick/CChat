@@ -1,0 +1,58 @@
+By Nobel Gautam and James Wang.
+
+Project Statement
+CChat is a program that allows people to communicate through a peer-to-peer connection.
+
+User Interface
+We envision a user-friendly window or tab that opens per connection with input buffer at the bottom where you can write/erase things and the conversation history at the top (with names and timestamps to the left of messages). We’ll be using ncurses for this.
+
+Perhaps something like this:
+
+11:45:26  james | hi! how u doin
+11:46:02  nobel | im fine thx
+========================================
+[nobel] do u wanna work on the proj la
+
+Here, “nobel” is in the process of typing out “later?”. There will be a blinking cursor displaying the current position in the line.
+
+Completing and sending this message would then result in:
+11:45:26  james | hi! how u doin
+11:46:02  nobel | im fine thx
+11:46:26  nobel | do u wanna work on the proj later?
+========================================
+[nobel]
+
+Creating a connection will be done by specifying an IP and a port to connect to. Since this is unsuitable for most purposes, we will create a nameserver to allow connecting via a name. The nameserver will simply attach a name to an ip:port. Running `cchat` with a name, rather than ip:port, will cause it to connect to the nameserver to find the intended ip:port.
+
+Nobel might run:
+(nobelpc) $ ./nameserver --register nobel 127.0.0.1:31337
+So James can then connect like:
+(jamespc) $ ./cchat nobel --nick james
+
+Or equivalently:
+(jamespc) $ ./cchat 127.0.0.1:31337 --nick james
+
+The “--nick” parameter will set your name for the conversation.
+
+This will open a window in both client’s windows (provided there is a process or service running on nobel’s pc waiting for this connection).
+
+Technical design
+
+Topics covered in class.
+We will use manual memory management, sockets, and forks.
+
+Responsibility
+We will allocate work between each other on a per-feature basis. It’s difficult at this time to predict everything that’ll come up or need to be done, or the workload involved in these tasks.
+
+Data Structures
+We will use data structures required for sockets (eg. sockaddr_in, hostent). For the nameserver, we will store the alias and ip:port in a struct.
+
+Algorithms
+To protect user privacy, we will use end-to-end encryption, which will probably make use of <insert algo here>.
+
+
+Timeline
+Jan 3 - Prototype
+Jan 8 - Encryption
+Jan 15 - Bug fixes
+Jan 22 - Polishing, finalize everything, more bugfixes.
