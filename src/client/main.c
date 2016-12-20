@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
                 print_help();
                 break;
             case 'n':
-                printf("Nickname\n");
+                printf("Nickname: %s\n", optarg);
                 break;
             default:
                 print_help();
