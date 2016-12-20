@@ -48,8 +48,7 @@ Data Structures
 We will use data structures required for sockets (eg. sockaddr_in, hostent). For the nameserver, we will store the alias and ip:port in a struct.
 
 Algorithms
-To protect user privacy, we will use end-to-end encryption, which will probably make use of <insert algo here>.
-
+To protect user privacy, we will use end-to-end encryption, which will probably implement with some form of AES.
 
 Timeline
 Jan 3 - Prototype
