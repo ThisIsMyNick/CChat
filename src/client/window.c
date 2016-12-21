@@ -5,19 +5,12 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include "window.h"
 #define HEIGHT 22
-
-typedef struct msg
-{
-    char *user;
-    int padding;
-    char *content;
-    int lines;
-} msg;
 
 void title_bar()
 {
-    mvprintw(0,5, "CChat");
+    mvprintw(0,0, "CChat");
 }
 
 void draw_messages(msg *msg_list, int length, int display_to)
@@ -37,11 +30,17 @@ void draw_messages(msg *msg_list, int length, int display_to)
             break;
     }
 
-    int msg_start_offset = 8;
+    int max_user_len = 0;
     for (i = starti; i < length; ++i)
     {
-        mvprintw(i+1-starti, 0, "%s |", msg_list[i].user);
-        mvprintw(i+1-starti, msg_start_offset, msg_list[i].content);
+        int len;
+        if ((len = strlen(msg_list[i].user)) > max_user_len)
+            max_user_len = len;
+    }
+
+    for (i = starti; i < length; ++i)
+    {
+        mvprintw(i+1-starti, 0, "[%s] %*s | %s", msg_list[i].timestamp, max_user_len,  msg_list[i].user, msg_list[i].content);
     }
 }
 
@@ -54,29 +53,37 @@ void free_msgs(msg* msgs, int length)
     }
 }
 
+#ifdef WINDOW_ONLY
 void fill3(msg* msgs)
 {
+    msgs[0].timestamp = malloc(9*sizeof(char));
+    strcpy(msgs[0].timestamp, "dd:mm:ss");
     msgs[0].user = malloc(10*sizeof(char));
-    strcpy(msgs[0].user, "User1");
+    strcpy(msgs[0].user, "name1");
     msgs[0].content = malloc(256*sizeof(char));
     strcpy(msgs[0].content, "Here's a message!");
     msgs[0].padding = 0;
     msgs[0].lines = 1;
 
+    msgs[1].timestamp = malloc(9*sizeof(char));
+    strcpy(msgs[1].timestamp, "dd:mm:ss");
     msgs[1].user = malloc(10*sizeof(char));
-    strcpy(msgs[1].user, "User2");
+    strcpy(msgs[1].user, "whataname");
     msgs[1].content = malloc(256*sizeof(char));
     strcpy(msgs[1].content, "Another message!");
-    msgs[0].padding = 0;
+    msgs[1].padding = 0;
     msgs[1].lines = 1;
 
+    msgs[2].timestamp = malloc(9*sizeof(char));
+    strcpy(msgs[2].timestamp, "dd:mm:ss");
     msgs[2].user = malloc(10*sizeof(char));
-    strcpy(msgs[2].user, "User1");
+    strcpy(msgs[2].user, "defin");
     msgs[2].content = malloc(256*sizeof(char));
     strcpy(msgs[2].content, "Here's yet another!");
-    msgs[0].padding = 0;
+    msgs[2].padding = 0;
     msgs[2].lines = 1;
 }
+#endif
 
 void window()
 {

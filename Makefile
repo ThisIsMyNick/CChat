@@ -10,8 +10,12 @@ all: $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(TARGET)
 
 .c.o:
-	$(CC) $(CFLAGS) -c $<  -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
+
+window: src/client/window.c
+	$(CC) $(CFLAGS) src/client/window.c -o window -DWINDOW_ONLY -lncurses
 
 clean:
 	rm -f src/client/*.o
 	rm -f cchat
+	rm -f window
