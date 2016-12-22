@@ -11,32 +11,32 @@
  * char *user - Username of content author
  * char *content - Message content
  */
-void add_msg(msg *m, int *m_size, int *m_curr, char *user, char *content)
+void add_msg(msgs_data *d, char *user, char *content)
 {
-    if (*m_size == *m_curr)
+    if (d->size == d->curr)
     {
-        m = realloc(m, (int)(*m_size*1.6)*sizeof(char));
-        *m_size = (int)(*m_size*1.6);
+        d->msg_list = realloc(d->msg_list, (int)(d->size*1.6)*sizeof(char));
+        d->size = (int)(d->size*1.6);
     }
-    m[*m_curr].timestamp = calloc(9, sizeof(char));
-    strcpy(m[*m_curr].timestamp, "hh:mm:ss");
-    m[*m_curr].user = calloc(11, sizeof(char));
-    strncpy(m[*m_curr].user, user, 10);
-    m[*m_curr].content = calloc(256, sizeof(char));
-    strncpy(m[*m_curr].content, content, 255);
-    m[*m_curr].lines = 1;
+    d->msg_list[d->curr].timestamp = calloc(9, sizeof(char));
+    strcpy(d->msg_list[d->curr].timestamp, "hh:mm:ss");
+    d->msg_list[d->curr].user = calloc(11, sizeof(char));
+    strncpy(d->msg_list[d->curr].user, user, 10);
+    d->msg_list[d->curr].content = calloc(256, sizeof(char));
+    strncpy(d->msg_list[d->curr].content, content, 255);
+    d->msg_list[d->curr].lines = 1;
 
-    *m_curr = *m_curr + 1;
+    d->curr++;
 }
 
-void free_msgs(msg *m, int curr)
+void free_msgs(msgs_data *d)
 {
     int i;
-    for (i = 0; i <= curr; ++i)
+    for (i = 0; i <= d->curr; ++i)
     {
-        free(m[i].timestamp);
-        free(m[i].user);
-        free(m[i].content);
+        free(d->msg_list[i].timestamp);
+        free(d->msg_list[i].user);
+        free(d->msg_list[i].content);
     }
-    free(m);
+    free(d->msg_list);
 }

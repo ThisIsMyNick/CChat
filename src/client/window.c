@@ -8,6 +8,7 @@
 #include "message.h"
 #include "window.h"
 
+WINDOW *input_win;
 int max_x, max_y;
 
 void title_bar()
@@ -21,7 +22,7 @@ void draw_messages(msg *msg_list, int length, int display_to)
     int starti;
 
     int i = display_to;
-    while (--i >= 0)
+    while (i >= 0)
     {
         if (lines+msg_list[i].lines <= max_y-1)
         {
@@ -30,6 +31,7 @@ void draw_messages(msg *msg_list, int length, int display_to)
         }
         else
             break;
+        i--;
     }
 
     int max_user_len = 0;
@@ -48,37 +50,44 @@ void draw_messages(msg *msg_list, int length, int display_to)
 
 void draw_prompt()
 {
-    mvprintw(max_y-1, 0, "[Prompt] ");
+    mvwprintw(input_win, 0, 0, "[Prompt] ");
+    wrefresh(input_win);
 }
 
-void update_window(msg* m, int length)
+void update_window(msgs_data *d)
 {
-    draw_messages(m, length, length);
+    draw_messages(d->msg_list, d->curr, d->curr);
     draw_prompt();
     refresh();
+    wrefresh(input_win);
 }
 
 void get_input(char *dst)
 {
     draw_prompt(); //to set position
-    getnstr(dst, 255);
-    mvprintw(max_y-1,0, "%*s", max_x, " ");
+    wgetnstr(input_win, dst, 255);
+    mvwprintw(input_win, 0, 0, "%*s", max_x, " ");
 }
 
 void init_window()
 {
-    initscr();
+    initscr(); //Message display
 
     getmaxyx(stdscr, max_y, max_x);
+    input_win = newwin(1,max_x, max_y-2,0);
+    box(input_win, 0, 0);
+    wborder(input_win, 0,0,0,0,0,0,0,0);
 
     title_bar();
 
     draw_prompt();
 
     refresh();
+    wrefresh(input_win);
 }
 
 void close_window()
 {
     endwin();
+    delwin(input_win);
 }

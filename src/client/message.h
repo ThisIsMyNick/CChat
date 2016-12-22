@@ -8,5 +8,12 @@ typedef struct msg
     int lines;
 } msg;
 
-void add_msg(msg *m, int *m_size, int *m_curr, char *user, char *content);
-void free_msgs(msg *m, int curr);
+typedef struct msgs_data
+{
+    struct msg* msg_list;
+    int curr;
+    int size;
+} msgs_data;
+
+void add_msg(msgs_data *d, char *user, char *content);
+void free_msgs(msgs_data *d);

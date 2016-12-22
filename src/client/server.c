@@ -5,36 +5,72 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <pthread.h>
 #include "message.h"
 #include "server.h"
 #include "window.h"
 
 extern int PORT;
 
-void serve(int cl_fd)
+static void debuglog(char *s)
 {
-    int msgs_size = 10;
-    int msgs_curr = 0;
-    msg* msg_list = calloc(msgs_size, sizeof(msg));
-    init_window();
+    int fd = open("log", O_CREAT|O_WRONLY|O_APPEND);
+    write(fd, s, strlen(s));
+    close(fd);
+}
+
+struct argl
+{
+    msgs_data *d;
+    int cl_fd;
+};
+
+static void *input(void *args)
+{
+    struct argl *arg = (struct argl*)args;
+    msgs_data *d = arg->d;
+    int cl_fd = arg->cl_fd;
     while (1)
     {
-        update_window(msg_list, msgs_curr);
         char buf[256] = {};
-        recv(cl_fd, buf, sizeof(buf), 0);
-        add_msg(msg_list, &msgs_size, &msgs_curr, "Client", buf);
-        update_window(msg_list, msgs_curr);
+        int nbytes = recv(cl_fd, buf, sizeof(buf), 0);
+        if (nbytes && nbytes != -1)
+        {
+            add_msg(d, "Client", buf);
+            update_window(d);
 
-        if (strcmp(buf, "/quit") == 0)
-            break;
+            if (strcmp(buf, "/quit") == 0)
+                break;
+        }
+    }
+}
 
+void serve(int cl_fd)
+{
+    msgs_data d;
+    d.curr = 0;
+    d.size = 10;
+    d.msg_list = calloc(d.size, sizeof(msg));
+    init_window();
+    //fcntl(cl_fd, F_SETFL, fcntl(cl_fd, F_GETFL) | O_NONBLOCK);
+
+    struct argl args;
+    args.d = &d;
+    args.cl_fd = cl_fd;
+    pthread_t input_thread;
+    pthread_create(&input_thread, NULL, input, (void*)&args);
+
+    while (1)
+    {
+        update_window(&d);
         char msg[256] = {};
         get_input(msg);
-        if (msg != 0)
+        if (msg && *msg)
         {
             send(cl_fd, msg, sizeof(msg), 0);
-            add_msg(msg_list, &msgs_size, &msgs_curr, "Server", msg);
-            update_window(msg_list, msgs_curr);
+            add_msg(&d, "Server", msg);
+            update_window(&d);
 
             if (strcmp(msg, "/quit") == 0)
                 break;
@@ -42,6 +78,7 @@ void serve(int cl_fd)
 
     }
     close(cl_fd);
+    free_msgs(&d);
     close_window();
     printf("Connection closed.\n");
 }

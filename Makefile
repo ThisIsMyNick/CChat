@@ -1,7 +1,7 @@
-CC = gcc
+CC = clang
 CFLAGS = -Wall
 TARGET = cchat
-LIBS = -lncurses
+LIBS = -lncurses -lpthread
 
 SRCS = src/client/main.c src/client/server.c src/client/client.c src/client/window.c src/client/message.c
 
