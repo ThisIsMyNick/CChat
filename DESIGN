@@ -46,9 +46,11 @@ We will allocate work between each other on a per-feature basis. It’s difficul
 
 Data Structures
 We will use data structures required for sockets (eg. sockaddr_in, hostent). For the nameserver, we will store the alias and ip:port in a struct.
+The chat client will also store messages in structs containing timestamp, username, and content of the message.
 
 Algorithms
 To protect user privacy, we will use end-to-end encryption, which will probably implement with some form of AES.
+We will also have several algorithms to deal with things like finding the name (in the nameserver), displaying the right set of messages when scrolling in the chat client, etc.
 
 Timeline
 Jan 3 - Prototype
