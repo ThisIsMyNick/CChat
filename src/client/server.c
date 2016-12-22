@@ -5,32 +5,44 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include "message.h"
 #include "server.h"
+#include "window.h"
 
 extern int PORT;
 
 void serve(int cl_fd)
 {
+    int msgs_size = 10;
+    int msgs_curr = 0;
+    msg* msg_list = calloc(msgs_size, sizeof(msg));
+    init_window();
     while (1)
     {
-        char buf[512] = {};
+        update_window(msg_list, msgs_curr);
+        char buf[256] = {};
         recv(cl_fd, buf, sizeof(buf), 0);
-        printf("[*] Received: %s\n", buf);
+        add_msg(msg_list, &msgs_size, &msgs_curr, "Client", buf);
+        update_window(msg_list, msgs_curr);
 
         if (strcmp(buf, "/quit") == 0)
             break;
 
-        printf("Input: ");
-        char msg[512] = {};
-        fgets(msg, sizeof(msg), stdin);
-        msg[strcspn(msg, "\n")] = 0;
-        send(cl_fd, msg, sizeof(msg), 0);
+        char msg[256] = {};
+        get_input(msg);
+        if (msg != 0)
+        {
+            send(cl_fd, msg, sizeof(msg), 0);
+            add_msg(msg_list, &msgs_size, &msgs_curr, "Server", msg);
+            update_window(msg_list, msgs_curr);
 
-        if (strcmp(msg, "/quit") == 0)
-            break;
+            if (strcmp(msg, "/quit") == 0)
+                break;
+        }
 
     }
     close(cl_fd);
+    close_window();
     printf("Connection closed.\n");
 }
 

@@ -5,8 +5,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include "message.h"
 #include "window.h"
-#define HEIGHT 22
+
+int max_x, max_y;
 
 void title_bar()
 {
@@ -18,10 +20,10 @@ void draw_messages(msg *msg_list, int length, int display_to)
     int lines = 0;
     int starti;
 
-    int i = display_to-1;
-    while (i-- >= 0)
+    int i = display_to;
+    while (--i >= 0)
     {
-        if (lines+msg_list[i].lines <= HEIGHT)
+        if (lines+msg_list[i].lines <= max_y-1)
         {
             lines += msg_list[i].lines;
             starti = i;
@@ -44,66 +46,39 @@ void draw_messages(msg *msg_list, int length, int display_to)
     }
 }
 
-void free_msgs(msg* msgs, int length)
+void draw_prompt()
 {
-    int i;
-    for (i = 0; i < length; ++i)
-    {
-        free(msgs[i].content);
-    }
+    mvprintw(max_y-1, 0, "[Prompt] ");
 }
 
-#ifdef WINDOW_ONLY
-void fill3(msg* msgs)
+void update_window(msg* m, int length)
 {
-    msgs[0].timestamp = malloc(9*sizeof(char));
-    strcpy(msgs[0].timestamp, "dd:mm:ss");
-    msgs[0].user = malloc(10*sizeof(char));
-    strcpy(msgs[0].user, "name1");
-    msgs[0].content = malloc(256*sizeof(char));
-    strcpy(msgs[0].content, "Here's a message!");
-    msgs[0].padding = 0;
-    msgs[0].lines = 1;
-
-    msgs[1].timestamp = malloc(9*sizeof(char));
-    strcpy(msgs[1].timestamp, "dd:mm:ss");
-    msgs[1].user = malloc(10*sizeof(char));
-    strcpy(msgs[1].user, "whataname");
-    msgs[1].content = malloc(256*sizeof(char));
-    strcpy(msgs[1].content, "Another message!");
-    msgs[1].padding = 0;
-    msgs[1].lines = 1;
-
-    msgs[2].timestamp = malloc(9*sizeof(char));
-    strcpy(msgs[2].timestamp, "dd:mm:ss");
-    msgs[2].user = malloc(10*sizeof(char));
-    strcpy(msgs[2].user, "defin");
-    msgs[2].content = malloc(256*sizeof(char));
-    strcpy(msgs[2].content, "Here's yet another!");
-    msgs[2].padding = 0;
-    msgs[2].lines = 1;
+    draw_messages(m, length, length);
+    draw_prompt();
+    refresh();
 }
-#endif
 
-void window()
+void get_input(char *dst)
+{
+    draw_prompt(); //to set position
+    getnstr(dst, 255);
+    mvprintw(max_y-1,0, "%*s", max_x, " ");
+}
+
+void init_window()
 {
     initscr();
 
+    getmaxyx(stdscr, max_y, max_x);
+
     title_bar();
 
-    msg *msgs = malloc(3 * sizeof(msg));
-    fill3(msgs);
-    draw_messages(msgs, 3, 3);
-    free_msgs(msgs, 3);
+    draw_prompt();
 
     refresh();
-    getch();
-    endwin();
 }
 
-#ifdef WINDOW_ONLY
-int main()
+void close_window()
 {
-    window();
+    endwin();
 }
-#endif

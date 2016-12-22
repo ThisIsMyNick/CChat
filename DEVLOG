@@ -1,2 +1,3 @@
 2016-12-20 Nobel: Add command line parsing with getopt
            Nobel: Add simple turn-by-turn socket communication
+2016-12-21 Nobel: ncurses prototype.

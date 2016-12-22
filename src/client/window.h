@@ -1,12 +1,6 @@
 #pragma once
 
-typedef struct msg
-{
-    char *timestamp;
-    char *user;
-    int padding;
-    char *content;
-    int lines;
-} msg;
-
-void window();
+void update_window(msg *m, int length);
+void get_input(char *dst);
+void init_window();
+void close_window();

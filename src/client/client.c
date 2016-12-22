@@ -7,6 +7,8 @@
 #include <netdb.h>
 #include <unistd.h>
 #include "client.h"
+#include "message.h"
+#include "window.h"
 
 extern int PORT;
 
@@ -53,25 +55,38 @@ void client(char sv_name[64], char nick[64])
     int sv_fd = sock_setup(sv_name);
     printf("Connection established.\n");
 
+    int msgs_curr = 0;
+    int msgs_size = 10;
+    msg* msg_list = calloc(msgs_size, sizeof(msg));
+
+    init_window();
     while (1)
     {
-        printf("Input: ");
-        char msg[512] = {};
-        fgets(msg, sizeof(msg), stdin);
-        msg[strcspn(msg, "\n")] = 0;
-        send(sv_fd, msg, sizeof(msg), 0);
+        update_window(msg_list, msgs_curr);
+        char msg[256] = {};
+        get_input(msg);
+        if (msg != 0)
+        {
+            msg[strcspn(msg, "\n")] = 0;
+            send(sv_fd, msg, sizeof(msg), 0);
+            add_msg(msg_list, &msgs_size, &msgs_curr, "Client", msg);
+            update_window(msg_list, msgs_curr);
 
-        if (strcmp(msg, "/quit") == 0)
-            break;
+            if (strcmp(msg, "/quit") == 0)
+                break;
 
-        char response[512] = {};
-        recv(sv_fd, response, sizeof(response), 0);
-        printf("[*] Received: %s\n", response);
+            char response[256] = {};
+            recv(sv_fd, response, sizeof(response), 0);
+            add_msg(msg_list, &msgs_size, &msgs_curr, "Server", response);
+            update_window(msg_list, msgs_curr);
 
-        if (strcmp(response, "/quit") == 0)
-            break;
+            if (strcmp(response, "/quit") == 0)
+                break;
+        }
     }
     close(sv_fd);
+    free_msgs(msg_list, msgs_curr);
+    close_window();
     printf("Connection closed.\n");
     exit(0);
 }
