@@ -8,13 +8,15 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <pthread.h>
+#include <signal.h>
 #include "client.h"
 #include "message.h"
 #include "window.h"
 
 extern int PORT;
 
-pthread_mutex_t msg_mutex;
+static int quit_condition = 0;
+static pthread_mutex_t msg_mutex;
 
 static void debuglog(char *s)
 {
@@ -78,11 +80,17 @@ static void *input(void *args)
         int nbytes = recv(sv_fd, response, sizeof(response), 0);
         if (nbytes && nbytes != -1)
         {
+            pthread_mutex_lock(&msg_mutex);
             add_msg(d, "Server", response);
             update_window(d);
+            pthread_mutex_unlock(&msg_mutex);
 
             if (strcmp(response, "/quit") == 0)
+            {
+                quit_condition = 1;
+                pthread_mutex_unlock(&msg_mutex);
                 break;
+            }
         }
     }
 }
@@ -103,9 +111,10 @@ void client(char sv_name[64], char nick[64])
     struct argl args;
     args.d = &d;
     args.sv_fd = sv_fd;
-    pthread_t input_thread;
+    pthread_t input_thread;//, output_thread;
     pthread_create(&input_thread, NULL, input, (void*)&args);
-    while (1)
+
+    while (!quit_condition)
     {
         update_window(&d);
         char msg[256] = {};
@@ -114,14 +123,19 @@ void client(char sv_name[64], char nick[64])
         {
             msg[strcspn(msg, "\n")] = 0;
             send(sv_fd, msg, sizeof(msg), 0);
+
+            pthread_mutex_lock(&msg_mutex);
             add_msg(&d, "Client", msg);
             update_window(&d);
+            pthread_mutex_unlock(&msg_mutex);
 
             if (strcmp(msg, "/quit") == 0)
+            {
                 break;
+            }
         }
-
     }
+    pthread_kill(input_thread, SIGTERM);
     close(sv_fd);
     free_msgs(&d);
     close_window();
