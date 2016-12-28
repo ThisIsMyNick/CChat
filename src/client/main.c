@@ -55,9 +55,9 @@ int main(int argc, char *argv[])
     {
         printf("Running as server\n");
         server();
-        return 0;
+    } else {
+        //Run as client
+        client(sv_name, nick);
     }
-    //Run as client
-    client(sv_name, nick);
     return 0;
 }

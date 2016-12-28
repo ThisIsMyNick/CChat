@@ -46,16 +46,16 @@ static void *input(void *args)
         if (nbytes && nbytes != -1)
         {
             char *decrypted = decrypt(response, key, iv);
-            pthread_mutex_lock(&msg_mutex);
-            add_msg(d, "Client", decrypted);
-            update_window(d);
-            pthread_mutex_unlock(&msg_mutex);
-
             if (strcmp(decrypted, "/quit") == 0)
             {
                 quit_condition = 1;
                 break;
             }
+
+            pthread_mutex_lock(&msg_mutex);
+            add_msg(d, "Client", decrypted);
+            update_window(d);
+            pthread_mutex_unlock(&msg_mutex);
         }
     }
 }
@@ -84,13 +84,16 @@ void serve(int cl_fd)
         {
             aes_t *encrypted = encrypt(msg, key, iv);
             send(cl_fd, encrypted, MESSAGE_BUFFER_SIZE, 0);
+            if (strcmp(msg, "/quit") == 0) {
+                quit_condition = 1;
+                break;
+            }
+
             pthread_mutex_lock(&msg_mutex);
             add_msg(&d, "Server", msg);
             update_window(&d);
             pthread_mutex_unlock(&msg_mutex);
 
-            if (strcmp(msg, "/quit") == 0)
-                break;
         }
 
     }
@@ -101,7 +104,6 @@ void serve(int cl_fd)
     close_window();
     printf("Connection closed.\n");
 }
-
 
 static void handshake(int cl_fd)
 {
@@ -133,7 +135,7 @@ void server()
     bind(sockfd, (struct sockaddr*)&sv_addr, sizeof(sv_addr));
     listen(sockfd, 5);
 
-    while (1)
+    while (!quit_condition)
     {
         socklen_t cl_len;
         int cl_fd = accept(sockfd, (struct sockaddr*)&cl_addr, &cl_len);
@@ -145,6 +147,5 @@ void server()
             serve(cl_fd);
             exit(0);
         }
-        close(cl_fd);
     }
 }

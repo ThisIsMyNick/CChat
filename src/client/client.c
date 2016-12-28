@@ -83,17 +83,16 @@ static void *input(void *args)
         if (nbytes && nbytes != -1)
         {
             char *decrypted = decrypt(response, key, iv);
+            if (strcmp(decrypted, "/quit") == 0)
+            {
+                quit_condition = 1;
+                break;
+            }
+
             pthread_mutex_lock(&msg_mutex);
             add_msg(d, "Server", decrypted);
             update_window(d);
             pthread_mutex_unlock(&msg_mutex);
-
-            if (strcmp(decrypted, "/quit") == 0)
-            {
-                quit_condition = 1;
-                pthread_mutex_unlock(&msg_mutex);
-                break;
-            }
         }
     }
     return 0;
@@ -131,15 +130,16 @@ void client(char sv_name[64], char nick[64])
             aes_t *encrypted = encrypt(msg, key, iv);
             send(sv_fd, encrypted, MESSAGE_BUFFER_SIZE, 0);
 
+            if (strcmp(msg, "/quit") == 0)
+            {
+                quit_condition = 1;
+                break;
+            }
+
             pthread_mutex_lock(&msg_mutex);
             add_msg(&d, "Client", msg);
             update_window(&d);
             pthread_mutex_unlock(&msg_mutex);
-
-            if (strcmp(msg, "/quit") == 0)
-            {
-                break;
-            }
         }
     }
     pthread_kill(input_thread, SIGTERM);
