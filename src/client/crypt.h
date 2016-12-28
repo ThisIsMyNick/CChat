@@ -3,6 +3,7 @@
 
 typedef unsigned char aes_t;
 
+void generate_iv(aes_t *buf);
 void generate_key(aes_t *buf);
 aes_t *encrypt(char *plaintext, aes_t *key, aes_t *iv);
 char *decrypt(aes_t *ciphertext, aes_t *key, aes_t *iv);

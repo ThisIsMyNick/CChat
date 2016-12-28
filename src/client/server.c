@@ -11,11 +11,14 @@
 #include "message.h"
 #include "server.h"
 #include "window.h"
+#include "crypt.h"
 
 extern int PORT;
 
 static int quit_condition = 0;
 static pthread_mutex_t msg_mutex;
+
+aes_t key[KEY_SIZE], iv[KEY_SIZE];
 
 static void debuglog(char *s)
 {
@@ -37,16 +40,17 @@ static void *input(void *args)
     int cl_fd = arg->cl_fd;
     while (1)
     {
-        char buf[256] = {};
-        int nbytes = recv(cl_fd, buf, sizeof(buf), 0);
+        aes_t response[MESSAGE_BUFFER_SIZE] = {};
+        int nbytes = recv(cl_fd, response, sizeof(response), 0);
         if (nbytes && nbytes != -1)
         {
+            char *decrypted = decrypt(response, key, iv);
             pthread_mutex_lock(&msg_mutex);
-            add_msg(d, "Client", buf);
+            add_msg(d, "Client", decrypted);
             update_window(d);
             pthread_mutex_unlock(&msg_mutex);
 
-            if (strcmp(buf, "/quit") == 0)
+            if (strcmp(decrypted, "/quit") == 0)
             {
                 quit_condition = 1;
                 break;
@@ -77,7 +81,8 @@ void serve(int cl_fd)
         get_input(msg);
         if (msg && *msg)
         {
-            send(cl_fd, msg, sizeof(msg), 0);
+            aes_t *encrypted = encrypt(msg, key, iv);
+            send(cl_fd, encrypted, MESSAGE_BUFFER_SIZE, 0);
             pthread_mutex_lock(&msg_mutex);
             add_msg(&d, "Server", msg);
             update_window(&d);
@@ -99,25 +104,17 @@ void serve(int cl_fd)
 
 static void handshake(int cl_fd)
 {
-    char buf[10] = {};
-    recv(cl_fd, buf, sizeof(buf), 0);
+    recv(cl_fd, key, sizeof(key), 0);
+    recv(cl_fd, iv, sizeof(iv), 0);
 
-    if (strcmp(buf, "sup") != 0)
-    {
-        fprintf(stderr, "Unable to set up connection.\n");
-        exit(1);
-    }
+    char *buf = "im here";
+    send(cl_fd, encrypt(buf, key, iv), MESSAGE_BUFFER_SIZE, 0);
 
-    char buf2[10] = "im here";
-    send(cl_fd, buf2, sizeof(buf2), 0);
-
-    char buf3[10] = {};
-    recv(cl_fd, buf3, sizeof(buf3), 0);
-
-    if (strcmp(buf3, "all good") != 0)
-    {
-        fprintf(stderr, "Unable to set up connection.\n");
-        exit(1);
+    aes_t buf2[MESSAGE_BUFFER_SIZE];
+    recv(cl_fd, buf2, MESSAGE_BUFFER_SIZE, 0);
+    if (strncmp(decrypt(buf2, key, iv), "all good", strlen(buf2)) != 0) {
+	    fprintf(stderr, "Unable to set up connection.\n");
+	    exit(1);
     }
 }
 

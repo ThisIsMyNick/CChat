@@ -13,6 +13,12 @@ void generate_key(aes_t *buf) {
     }
 }
 
+void generate_iv(aes_t *buf) {
+    if (!RAND_bytes(buf, sizeof(buf))) {
+        fprintf(stderr, "[!] Could not generate key");
+    }
+}
+
 aes_t *encrypt(char *plaintext, aes_t *key, aes_t *iv) {
     aes_t *ciphertext = (aes_t *) malloc(BUFFER_SIZE);
     AES_KEY wctx;

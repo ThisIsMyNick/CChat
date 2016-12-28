@@ -12,11 +12,14 @@
 #include "client.h"
 #include "message.h"
 #include "window.h"
+#include "crypt.h"
 
 extern int PORT;
 
 static int quit_condition = 0;
 static pthread_mutex_t msg_mutex;
+
+aes_t key[KEY_SIZE], iv[KEY_SIZE];
 
 static void debuglog(char *s)
 {
@@ -27,20 +30,18 @@ static void debuglog(char *s)
 
 static void handshake(int sv_fd)
 {
-    char buf[10] = "sup";
-    send(sv_fd, buf, sizeof(buf), 0);
+    send(sv_fd, key, sizeof(key), 0);
+    send(sv_fd, iv, sizeof(iv), 0);
 
-    char buf2[10] = {};
-    recv(sv_fd, buf2, sizeof(buf2), 0);
-
-    if (strcmp(buf2, "im here") != 0)
-    {
+    aes_t buf[MESSAGE_BUFFER_SIZE];
+    recv(sv_fd, buf, MESSAGE_BUFFER_SIZE, 0);
+    if (strncmp(decrypt(buf, key, iv), "im here", strlen(buf)) != 0) {
         fprintf(stderr, "Unable to set up connection.\n");
         exit(1);
     }
 
-    char buf3[10] = "all good";
-    send(sv_fd, buf3, sizeof(buf3), 0);
+    char *buf2 = "all good";
+    send(sv_fd, encrypt(buf2, key, iv), MESSAGE_BUFFER_SIZE, 0);
 }
 
 static int sock_setup(char sv_name[64])
@@ -76,16 +77,17 @@ static void *input(void *args)
     int sv_fd = arg->sv_fd;
     while (1)
     {
-        char response[256] = {};
+        aes_t response[MESSAGE_BUFFER_SIZE] = {};
         int nbytes = recv(sv_fd, response, sizeof(response), 0);
         if (nbytes && nbytes != -1)
         {
+            char *decrypted = decrypt(response, key, iv);
             pthread_mutex_lock(&msg_mutex);
-            add_msg(d, "Server", response);
+            add_msg(d, "Server", decrypted);
             update_window(d);
             pthread_mutex_unlock(&msg_mutex);
 
-            if (strcmp(response, "/quit") == 0)
+            if (strcmp(decrypted, "/quit") == 0)
             {
                 quit_condition = 1;
                 pthread_mutex_unlock(&msg_mutex);
@@ -97,6 +99,8 @@ static void *input(void *args)
 
 void client(char sv_name[64], char nick[64])
 {
+    generate_key(key);
+    generate_iv(iv);
     int sv_fd = sock_setup(sv_name);
     printf("Connection established.\n");
 
@@ -122,7 +126,8 @@ void client(char sv_name[64], char nick[64])
         if (msg && *msg)
         {
             msg[strcspn(msg, "\n")] = 0;
-            send(sv_fd, msg, sizeof(msg), 0);
+            aes_t *encrypted = encrypt(msg, key, iv);
+            send(sv_fd, encrypted, MESSAGE_BUFFER_SIZE, 0);
 
             pthread_mutex_lock(&msg_mutex);
             add_msg(&d, "Client", msg);
