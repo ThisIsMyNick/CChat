@@ -42,8 +42,7 @@ static void *input(void *args)
     while (1)
     {
         aes_t response[MESSAGE_BUFFER_SIZE] = {};
-        int nbytes = recv(cl_fd, response, sizeof(response), 0);
-        if (nbytes && nbytes != -1)
+        int nbytes = recv(cl_fd, response, sizeof(response), 0); if (nbytes && nbytes != -1)
         {
             char *decrypted = decrypt(response, key, iv);
             if (strcmp(decrypted, "/quit") == 0)
@@ -58,6 +57,7 @@ static void *input(void *args)
             pthread_mutex_unlock(&msg_mutex);
         }
     }
+    return 0;
 }
 
 void serve(int cl_fd)
