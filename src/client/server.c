@@ -113,7 +113,7 @@ static void handshake(int cl_fd)
 
     aes_t buf2[MESSAGE_BUFFER_SIZE];
     recv(cl_fd, buf2, MESSAGE_BUFFER_SIZE, 0);
-    if (strncmp(decrypt(buf2, key, iv), "all good", strlen(buf2)) != 0) {
+    if (strncmp(decrypt(buf2, key, iv), "all good", MESSAGE_BUFFER_SIZE) != 0) {
 	    fprintf(stderr, "Unable to set up connection.\n");
 	    exit(1);
     }

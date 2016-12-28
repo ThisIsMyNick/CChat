@@ -36,7 +36,7 @@ static void handshake(int sv_fd)
 
     aes_t buf[MESSAGE_BUFFER_SIZE];
     recv(sv_fd, buf, MESSAGE_BUFFER_SIZE, 0);
-    if (strncmp(decrypt(buf, key, iv), "im here", strlen(buf)) != 0) {
+    if (strncmp(decrypt(buf, key, iv), "im here", MESSAGE_BUFFER_SIZE) != 0) {
         fprintf(stderr, "Unable to set up connection.\n");
         exit(1);
     }
@@ -96,6 +96,7 @@ static void *input(void *args)
             }
         }
     }
+    return 0;
 }
 
 void client(char sv_name[64], char nick[64])
