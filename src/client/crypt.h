@@ -1,5 +1,5 @@
 #define KEY_SIZE 32
-#define BUFFER_SIZE 256 // KEY_SIZE * 8
+#define BUFFER_SIZE 1024
 
 typedef unsigned char aes_t;
 
