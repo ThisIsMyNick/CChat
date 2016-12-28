@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
         {"help", no_argument      , NULL, 'h'},
         {"conn", required_argument, NULL, 'c'},
         {"nick", required_argument, NULL, 'n'},
-        { NULL , NULL             , NULL,  0 }
+        { NULL , 0                , NULL,  0 }
     };
 
     int next_option;
