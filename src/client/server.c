@@ -1,17 +1,18 @@
+#include <fcntl.h>
+#include <netinet/in.h>
+#include <pthread.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
+#include <sys/types.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <pthread.h>
-#include <signal.h>
+
+#include "crypt.h"
 #include "message.h"
 #include "server.h"
 #include "window.h"
-#include "crypt.h"
 
 extern int PORT;
 
