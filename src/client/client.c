@@ -100,8 +100,8 @@ static void *input(void *args)
 
 void client(char sv_name[64], char nick[64])
 {
-    generate_key(key);
-    generate_iv(iv);
+    generate_bytes(key);
+    generate_bytes(iv);
     int sv_fd = sock_setup(sv_name);
     printf("Connection established.\n");
 

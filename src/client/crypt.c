@@ -7,13 +7,7 @@
 
 typedef unsigned char aes_t;
 
-void generate_key(aes_t *buf) {
-    if (!RAND_bytes(buf, sizeof(buf))) {
-        fprintf(stderr, "[!] Could not generate key");
-    }
-}
-
-void generate_iv(aes_t *buf) {
+void generate_bytes(aes_t *buf) {
     if (!RAND_bytes(buf, sizeof(buf))) {
         fprintf(stderr, "[!] Could not generate key");
     }
