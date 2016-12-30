@@ -85,6 +85,8 @@ static void *input(void *args)
             char *decrypted = decrypt(response, key, iv);
             if (strcmp(decrypted, "/quit") == 0)
             {
+                add_msg(d, "CChat", "The connection has been closed.");
+                update_window(d);
                 quit_condition = 1;
                 break;
             }
