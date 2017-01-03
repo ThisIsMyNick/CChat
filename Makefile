@@ -3,7 +3,7 @@ CFLAGS = -Wall
 TARGET = cchat
 LIBS = -lncurses -lpthread -lcrypto
 
-SRCS = src/client/main.c src/client/server.c src/client/client.c src/client/window.c src/client/message.c src/client/crypt.c
+SRCS = src/client/main.c src/client/server.c src/client/client.c src/client/window.c src/client/message.c src/client/crypt.c src/client/notify.c
 
 OBJS = $(SRCS:.c=.o)
 

@@ -14,6 +14,7 @@
 #include "crypt.h"
 #include "message.h"
 #include "window.h"
+#include "notify.h"
 
 extern int PORT;
 
@@ -94,6 +95,7 @@ static void *input(void *args)
             pthread_mutex_lock(&msg_mutex);
             add_msg(d, "Server", decrypted);
             update_window(d);
+            notify(d);
             pthread_mutex_unlock(&msg_mutex);
         }
     }
