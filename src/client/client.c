@@ -51,12 +51,15 @@ static void handshake(int sv_fd)
 
 static void share_names(int cl_fd)
 {
+    strcpy(sv_name, "Server");
+    /*
     aes_t *cl_name_enc = encrypt(cl_name, key, iv);
     send(cl_fd, cl_name_enc, MESSAGE_BUFFER_SIZE, 0);
 
     aes_t sv_name_enc[MESSAGE_BUFFER_SIZE] = {};
     recv(cl_fd, sv_name_enc, MESSAGE_BUFFER_SIZE, 0);
     strncpy(sv_name, decrypt(sv_name_enc, key, iv), NAME_LEN-1);
+    */
 }
 
 static int sock_setup(char sv_nameaddr[64])

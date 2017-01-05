@@ -128,12 +128,15 @@ static void handshake(int cl_fd)
 
 static void share_names(int cl_fd)
 {
+    strcpy(cl_name, "Client");
+    /*
     aes_t cl_name_enc[MESSAGE_BUFFER_SIZE] = {};
     recv(cl_fd, cl_name_enc, MESSAGE_BUFFER_SIZE, 0);
     strncpy(cl_name, decrypt(cl_name_enc, key, iv), NAME_LEN-1);
 
     aes_t *sv_name_enc = encrypt(sv_name, key, iv);
     send(cl_fd, sv_name_enc, MESSAGE_BUFFER_SIZE, 0);
+    */
 }
 
 void server(char nick[64])
