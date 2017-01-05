@@ -16,6 +16,8 @@
 #include "notify.h"
 
 extern int PORT;
+static char sv_name[NAME_LEN] = {};
+static char cl_name[NAME_LEN] = {};
 
 static int quit_condition = 0;
 static pthread_mutex_t msg_mutex;
@@ -56,7 +58,7 @@ static void *input(void *args)
             }
 
             pthread_mutex_lock(&msg_mutex);
-            add_msg(d, "Client", decrypted);
+            add_msg(d, cl_name, decrypted);
             update_window(d);
             notify(d);
             pthread_mutex_unlock(&msg_mutex);
@@ -95,15 +97,12 @@ void serve(int cl_fd)
             }
 
             pthread_mutex_lock(&msg_mutex);
-            add_msg(&d, "Server", msg);
+            add_msg(&d, sv_name, msg);
             update_window(&d);
             pthread_mutex_unlock(&msg_mutex);
-
         }
-
     }
     pthread_kill(input_thread, SIGTERM);
-    //pthread_join(input_thread, NULL);
     close(cl_fd);
     free_msgs(&d);
     close_window();
@@ -120,14 +119,27 @@ static void handshake(int cl_fd)
 
     aes_t buf2[MESSAGE_BUFFER_SIZE];
     recv(cl_fd, buf2, MESSAGE_BUFFER_SIZE, 0);
-    if (strncmp(decrypt(buf2, key, iv), "all good", MESSAGE_BUFFER_SIZE) != 0) {
+    if (strncmp(decrypt(buf2, key, iv), "all good", MESSAGE_BUFFER_SIZE) != 0)
+    {
         fprintf(stderr, "Unable to set up connection.\n");
         exit(1);
     }
 }
 
-void server()
+static void share_names(int cl_fd)
 {
+    aes_t cl_name_enc[MESSAGE_BUFFER_SIZE] = {};
+    recv(cl_fd, cl_name_enc, MESSAGE_BUFFER_SIZE, 0);
+    strncpy(cl_name, decrypt(cl_name_enc, key, iv), NAME_LEN-1);
+
+    aes_t *sv_name_enc = encrypt(sv_name, key, iv);
+    send(cl_fd, sv_name_enc, MESSAGE_BUFFER_SIZE, 0);
+}
+
+void server(char nick[64])
+{
+    strncpy(sv_name, nick, NAME_LEN-1);
+
     int sockfd;
     struct sockaddr_in sv_addr, cl_addr;
 
@@ -140,7 +152,7 @@ void server()
     bind(sockfd, (struct sockaddr*)&sv_addr, sizeof(sv_addr));
     listen(sockfd, 5);
 
-    while (!quit_condition)
+    while (1)
     {
         socklen_t cl_len;
         int cl_fd = accept(sockfd, (struct sockaddr*)&cl_addr, &cl_len);
@@ -149,6 +161,8 @@ void server()
             handshake(cl_fd);
             printf("Connection established.\n");
 
+
+            share_names(cl_fd);
             serve(cl_fd);
             exit(0);
         }

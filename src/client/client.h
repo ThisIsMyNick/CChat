@@ -1,3 +1,3 @@
 #pragma once
 
-void client(char sv_name[64], char nick[64]);
+void client(char sv_nameaddr[64], char nick[64]);

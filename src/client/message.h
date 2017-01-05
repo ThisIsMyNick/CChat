@@ -1,5 +1,6 @@
 #pragma once
 #define MESSAGE_BUFFER_SIZE 1024
+#define NAME_LEN 21
 
 typedef struct msg
 {

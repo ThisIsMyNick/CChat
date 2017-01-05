@@ -9,17 +9,17 @@
 
 int PORT = 31337;
 
-void print_help()
+void help_exit()
 {
     printf("Usage:\n"
-            "CChat --conn (ip:port|name) [--nick yourname] [--help]\n");
+            "CChat --nick yourname [--conn (ip:port|name)] [--help]\n");
     exit(1);
 }
 
 int main(int argc, char *argv[])
 {
     char nick[64] = {};
-    char sv_name[64] = {};
+    char sv_nameaddr[64] = {};
 
     const char* const short_options = "hc:n:";
     const struct option long_options[] =
@@ -36,28 +36,35 @@ int main(int argc, char *argv[])
         switch (next_option)
         {
             case 'h':
-                print_help();
+                help_exit();
                 break;
             case 'c':
-                strncpy(sv_name, optarg, 64);
-                printf("Connect to server at %s\n", sv_name);
+                strncpy(sv_nameaddr, optarg, 64);
+                printf("Connect to server at %s\n", sv_nameaddr);
                 break;
             case 'n':
                 strncpy(nick, optarg, 64);
                 printf("Nickname: %s\n", optarg);
                 break;
             default:
-                print_help();
+                help_exit();
         }
     }
 
-    if (sv_name[0] == 0) //Run as server
+    if (!*nick)
+    {
+        printf("Please specify nick.\n");
+        help_exit();
+    }
+
+    if (sv_nameaddr[0] == 0) //Run as server
     {
         printf("Running as server\n");
-        server();
-    } else {
+        server(nick);
+    } else
+    {
         //Run as client
-        client(sv_name, nick);
+        client(sv_nameaddr, nick);
     }
     return 0;
 }

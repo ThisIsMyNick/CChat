@@ -16,7 +16,11 @@
 #include "window.h"
 #include "notify.h"
 
+#define DEBUG fprintf(stderr, "%s:%d", __FUNCTION__, __LINE__);
+
 extern int PORT;
+static char sv_name[NAME_LEN] = {};
+static char cl_name[NAME_LEN] = {};
 
 static int quit_condition = 0;
 static pthread_mutex_t msg_mutex;
@@ -37,7 +41,8 @@ static void handshake(int sv_fd)
 
     aes_t buf[MESSAGE_BUFFER_SIZE];
     recv(sv_fd, buf, MESSAGE_BUFFER_SIZE, 0);
-    if (strncmp(decrypt(buf, key, iv), "im here", MESSAGE_BUFFER_SIZE) != 0) {
+    if (strncmp(decrypt(buf, key, iv), "im here", MESSAGE_BUFFER_SIZE) != 0)
+    {
         fprintf(stderr, "Unable to set up connection.\n");
         exit(1);
     }
@@ -46,14 +51,27 @@ static void handshake(int sv_fd)
     send(sv_fd, encrypt(buf2, key, iv), MESSAGE_BUFFER_SIZE, 0);
 }
 
-static int sock_setup(char sv_name[64])
+static void share_names(int cl_fd)
+{
+    DEBUG
+    aes_t *cl_name_enc = encrypt(cl_name, key, iv);
+    send(cl_fd, cl_name_enc, MESSAGE_BUFFER_SIZE, 0);
+    DEBUG
+
+    aes_t sv_name_enc[MESSAGE_BUFFER_SIZE] = {};
+    recv(cl_fd, sv_name_enc, MESSAGE_BUFFER_SIZE, 0);
+    strncpy(sv_name, decrypt(sv_name_enc, key, iv), NAME_LEN-1);
+    DEBUG
+}
+
+static int sock_setup(char sv_nameaddr[64])
 {
     int sockfd;
     struct sockaddr_in sv_addr;
     struct hostent *server;
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    server = gethostbyname(sv_name);
+    server = gethostbyname(sv_nameaddr);
 
     memset(&sv_addr, 0, sizeof(sv_addr));
     sv_addr.sin_family = AF_INET;
@@ -63,6 +81,7 @@ static int sock_setup(char sv_name[64])
     connect(sockfd, (struct sockaddr*)&sv_addr, sizeof(sv_addr));
 
     handshake(sockfd);
+    share_names(sockfd);
     return sockfd;
 }
 
@@ -93,7 +112,7 @@ static void *input(void *args)
             }
 
             pthread_mutex_lock(&msg_mutex);
-            add_msg(d, "Server", decrypted);
+            add_msg(d, sv_name, decrypted);
             update_window(d);
             notify(d);
             pthread_mutex_unlock(&msg_mutex);
@@ -102,11 +121,13 @@ static void *input(void *args)
     return 0;
 }
 
-void client(char sv_name[64], char nick[64])
+void client(char sv_nameaddr[64], char nick[64])
 {
+    strncpy(cl_name, nick, NAME_LEN-1);
+
     generate_bytes(key);
     generate_bytes(iv);
-    int sv_fd = sock_setup(sv_name);
+    int sv_fd = sock_setup(sv_nameaddr);
     printf("Connection established.\n");
 
     msgs_data d;
@@ -141,7 +162,7 @@ void client(char sv_name[64], char nick[64])
             }
 
             pthread_mutex_lock(&msg_mutex);
-            add_msg(&d, "Client", msg);
+            add_msg(&d, cl_name, msg);
             update_window(&d);
             pthread_mutex_unlock(&msg_mutex);
         }
