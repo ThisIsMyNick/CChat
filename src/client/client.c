@@ -32,21 +32,10 @@ static void debuglog(char *s)
     close(fd);
 }
 
-static void handshake(int sv_fd)
+static void exchange_keys(int sv_fd)
 {
     send(sv_fd, key, sizeof(key), 0);
     send(sv_fd, iv, sizeof(iv), 0);
-
-    aes_t buf[MESSAGE_BUFFER_SIZE];
-    recv(sv_fd, buf, MESSAGE_BUFFER_SIZE, 0);
-    if (strncmp(decrypt(buf, key, iv), "im here", MESSAGE_BUFFER_SIZE) != 0)
-    {
-        fprintf(stderr, "Unable to set up connection.\n");
-        exit(1);
-    }
-
-    char *buf2 = "all good";
-    send(sv_fd, encrypt(buf2, key, iv), MESSAGE_BUFFER_SIZE, 0);
 }
 
 static void share_names(int cl_fd)
@@ -78,7 +67,7 @@ static int sock_setup(char sv_nameaddr[64])
 
     connect(sockfd, (struct sockaddr*)&sv_addr, sizeof(sv_addr));
 
-    handshake(sockfd);
+    exchange_keys(sockfd);
     share_names(sockfd);
     return sockfd;
 }

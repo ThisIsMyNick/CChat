@@ -109,21 +109,10 @@ void serve(int cl_fd)
     printf("Connection closed.\n");
 }
 
-static void handshake(int cl_fd)
+static void exchange_keys(int cl_fd)
 {
     recv(cl_fd, key, sizeof(key), 0);
     recv(cl_fd, iv, sizeof(iv), 0);
-
-    char *buf = "im here";
-    send(cl_fd, encrypt(buf, key, iv), MESSAGE_BUFFER_SIZE, 0);
-
-    aes_t buf2[MESSAGE_BUFFER_SIZE];
-    recv(cl_fd, buf2, MESSAGE_BUFFER_SIZE, 0);
-    if (strncmp(decrypt(buf2, key, iv), "all good", MESSAGE_BUFFER_SIZE) != 0)
-    {
-        fprintf(stderr, "Unable to set up connection.\n");
-        exit(1);
-    }
 }
 
 static void share_names(int cl_fd)
@@ -161,10 +150,8 @@ void server(char nick[64])
         int cl_fd = accept(sockfd, (struct sockaddr*)&cl_addr, &cl_len);
         if (fork() == 0)
         {
-            handshake(cl_fd);
             printf("Connection established.\n");
-
-
+            exchange_keys(cl_fd);
             share_names(cl_fd);
             serve(cl_fd);
             exit(0);
