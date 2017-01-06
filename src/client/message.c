@@ -1,5 +1,7 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "message.h"
 
@@ -20,7 +22,11 @@ void add_msg(msgs_data *d, char *user, char *content)
         d->size = (int)(d->size*1.6);
     }
     d->msg_list[d->curr].timestamp = calloc(9, sizeof(char));
-    strcpy(d->msg_list[d->curr].timestamp, "hh:mm:ss");
+
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+    sprintf(d->msg_list[d->curr].timestamp, "%02d:%02d:%02d", tm.tm_hour, tm.tm_min, tm.tm_sec);
+
     d->msg_list[d->curr].user = calloc(11, sizeof(char));
     strncpy(d->msg_list[d->curr].user, user, 10);
     d->msg_list[d->curr].content = calloc(256, sizeof(char));
