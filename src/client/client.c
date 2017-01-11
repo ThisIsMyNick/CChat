@@ -89,8 +89,11 @@ static void *input(void *args)
             char *decrypted = decrypt(response, key, iv);
             if (strcmp(decrypted, "/quit") == 0)
             {
+                pthread_mutex_lock(&msg_mutex);
                 add_msg(d, "CChat", "The connection has been closed.");
                 update_window(d);
+                notify(d);
+                pthread_mutex_unlock(&msg_mutex);
                 quit_condition = 1;
                 break;
             }
@@ -116,11 +119,10 @@ void client(char sv_nameaddr[64], char nick[64])
 
     msgs_data d;
     d.curr = 0;
-    d.size = 10;
+    d.size = 100;
     d.msg_list = calloc(d.size, sizeof(msg));
 
     init_window();
-    //fcntl(sv_fd, F_SETFL, fcntl(sv_fd, F_GETFL)|O_NONBLOCK);
 
     struct argl args;
     args.d = &d;

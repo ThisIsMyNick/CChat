@@ -51,8 +51,11 @@ static void *input(void *args)
             char *decrypted = decrypt(response, key, iv);
             if (strcmp(decrypted, "/quit") == 0)
             {
+                pthread_mutex_lock(&msg_mutex);
                 add_msg(d, "CChat", "The connection has been closed.");
                 update_window(d);
+                notify(d);
+                pthread_mutex_unlock(&msg_mutex);
                 quit_condition = 1;
                 break;
             }
@@ -71,10 +74,9 @@ void serve(int cl_fd)
 {
     msgs_data d;
     d.curr = 0;
-    d.size = 10;
+    d.size = 100;
     d.msg_list = calloc(d.size, sizeof(msg));
     init_window();
-    //fcntl(cl_fd, F_SETFL, fcntl(cl_fd, F_GETFL) | O_NONBLOCK);
 
     struct argl args;
     args.d = &d;
@@ -91,7 +93,9 @@ void serve(int cl_fd)
         {
             aes_t *encrypted = encrypt(msg, key, iv);
             send(cl_fd, encrypted, MESSAGE_BUFFER_SIZE, 0);
-            if (strcmp(msg, "/quit") == 0) {
+
+            if (strcmp(msg, "/quit") == 0)
+            {
                 quit_condition = 1;
                 break;
             }
