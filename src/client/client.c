@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 
 #include "client.h"
 #include "crypt.h"
@@ -52,14 +53,12 @@ static int sock_setup(char sv_nameaddr[64])
 {
     int sockfd;
     struct sockaddr_in sv_addr;
-    struct hostent *server;
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    server = gethostbyname(sv_nameaddr);
 
     memset(&sv_addr, 0, sizeof(sv_addr));
     sv_addr.sin_family = AF_INET;
-    memcpy(server->h_addr, &sv_addr.sin_addr.s_addr, server->h_length);
+    inet_aton(sv_nameaddr, &(sv_addr.sin_addr));
     sv_addr.sin_port = htons(PORT);
 
     connect(sockfd, (struct sockaddr*)&sv_addr, sizeof(sv_addr));
