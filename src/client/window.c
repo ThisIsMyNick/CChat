@@ -25,7 +25,7 @@ void draw_messages(msg *msg_list, int length, int display_to)
     int i = display_to;
     while (i >= 0)
     {
-        if (lines+msg_list[i].lines <= max_y-1)
+        if (lines+msg_list[i].lines <= max_y-3)
         {
             lines += msg_list[i].lines;
             starti = i;
@@ -55,8 +55,20 @@ void draw_prompt()
     wrefresh(input_win);
 }
 
+void clear_msgs()
+{
+    int i;
+    for (i = 0; i < max_y-3; ++i)
+    {
+        move(i,0);
+        clrtoeol();
+    }
+}
+
 void update_window(msgs_data *d)
 {
+    clear_msgs();
+    title_bar();
     draw_messages(d->msg_list, d->curr, d->curr);
     draw_prompt();
     refresh();
