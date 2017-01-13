@@ -1,7 +1,7 @@
-#CChat
+# CChat
 By Nobel Gautam and James Wang
 
+## Requirements
+Dependencies can be installed by running:
 
-##Requirements
-ncurses  
-`$ sudo apt-get install libncurses-dev`
+`$ sudo apt-get install libncurses-dev openssl`
