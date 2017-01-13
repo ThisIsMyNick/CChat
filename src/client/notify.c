@@ -7,6 +7,9 @@
 
 void notify(msgs_data *d)
 {
+    const char *disp = getenv("DISPLAY");
+    if (!*disp)
+        return;
     //http://superuser.com/a/533254
     FILE *fp = popen("xprop -id $(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) _NET_WM_NAME", "r");
     char window[256] = {};
