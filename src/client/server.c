@@ -134,13 +134,13 @@ void server(char nick[64])
     strncpy(sv_name, nick, NAME_LEN-1);
 
     int sockfd;
-    struct sockaddr_in sv_addr, cl_addr;
+    struct sockaddr_in6 sv_addr, cl_addr;
 
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    sockfd = socket(AF_INET6, SOCK_STREAM, 0);
     bzero(&sv_addr, sizeof(sv_addr));
-    sv_addr.sin_family = AF_INET;
-    sv_addr.sin_addr.s_addr = INADDR_ANY;
-    sv_addr.sin_port = htons(PORT);
+    sv_addr.sin6_family = AF_INET6;
+    sv_addr.sin6_addr = in6addr_any;
+    sv_addr.sin6_port = htons(PORT);
 
     bind(sockfd, (struct sockaddr*)&sv_addr, sizeof(sv_addr));
     listen(sockfd, 5);
