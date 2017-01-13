@@ -52,14 +52,14 @@ static void share_names(int cl_fd)
 static int sock_setup(char sv_nameaddr[64])
 {
     int sockfd;
-    struct sockaddr_in sv_addr;
+    struct sockaddr_in6 sv_addr;
 
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    sockfd = socket(AF_INET6, SOCK_STREAM, 0);
 
     memset(&sv_addr, 0, sizeof(sv_addr));
-    sv_addr.sin_family = AF_INET;
-    inet_aton(sv_nameaddr, &(sv_addr.sin_addr));
-    sv_addr.sin_port = htons(PORT);
+    sv_addr.sin6_family = AF_INET6;
+    inet_pton(AF_INET6, sv_nameaddr, &(sv_addr.sin6_addr));
+    sv_addr.sin6_port = htons(PORT);
 
     connect(sockfd, (struct sockaddr*)&sv_addr, sizeof(sv_addr));
 
