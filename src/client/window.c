@@ -58,7 +58,7 @@ void draw_prompt()
 void clear_msgs()
 {
     int i;
-    for (i = 0; i < max_y-3; ++i)
+    for (i = 1; i < max_y-3; ++i)
     {
         move(i,0);
         clrtoeol();
@@ -67,12 +67,15 @@ void clear_msgs()
 
 void update_window(msgs_data *d)
 {
+    int x,y;
+    getyx(input_win, y, x);
     clear_msgs();
-    title_bar();
     draw_messages(d->msg_list, d->curr, d->curr);
     draw_prompt();
+    wmove(input_win, y, x);
     refresh();
     wrefresh(input_win);
+
 }
 
 void get_input(char *dst)
@@ -88,8 +91,6 @@ void init_window()
 
     getmaxyx(stdscr, max_y, max_x);
     input_win = newwin(1,max_x, max_y-2,0);
-    box(input_win, 0, 0);
-    wborder(input_win, 0,0,0,0,0,0,0,0);
 
     title_bar();
 
