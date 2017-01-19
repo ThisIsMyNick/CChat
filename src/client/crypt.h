@@ -1,10 +1,9 @@
-#define KEY_SIZE 32
+#define KEY_SIZE 32 // 256 bit key
+#define IV_SIZE 16 // 128 bit iv
 #define BUFFER_SIZE 1024
 
 typedef unsigned char aes_t;
 
 void generate_bytes(aes_t *buf);
-aes_t *encrypt(char *plaintext, aes_t *key, aes_t *iv);
-char *decrypt(aes_t *ciphertext, aes_t *key, aes_t *iv);
-aes_t *to_unsigned(char *buf);
-char *to_signed(aes_t *buf);
+int encrypt(aes_t *plaintext, aes_t *key, aes_t *iv, aes_t *ciphertext);
+int decrypt(aes_t *ciphertext, int ciphertext_len, aes_t *key, aes_t *iv, aes_t *plaintext);

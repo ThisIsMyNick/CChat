@@ -42,13 +42,15 @@ static void *input(void *args)
     struct argl *arg = (struct argl*)args;
     msgs_data *d = arg->d;
     int cl_fd = arg->cl_fd;
+
+    struct packet packet;
     while (1)
     {
-        aes_t response[MESSAGE_BUFFER_SIZE] = {};
-        int nbytes = recv(cl_fd, response, sizeof(response), 0);
+        int nbytes = recv(cl_fd, &packet, sizeof(packet), 0);
         if (nbytes && nbytes != -1)
         {
-            char *decrypted = decrypt(response, key, iv);
+            char decrypted[MESSAGE_BUFFER_SIZE] = {};
+            int length = decrypt(packet.data, packet.length, key, iv, decrypted);
             if (strcmp(decrypted, "/quit") == 0)
             {
                 pthread_mutex_lock(&msg_mutex);
@@ -83,6 +85,7 @@ void serve(int cl_fd)
     args.cl_fd = cl_fd;
     pthread_t input_thread;
     pthread_create(&input_thread, NULL, input, (void*)&args);
+    struct packet packet;
 
     while (!quit_condition)
     {
@@ -91,8 +94,9 @@ void serve(int cl_fd)
         get_input(msg);
         if (msg && *msg)
         {
-            aes_t *encrypted = encrypt(msg, key, iv);
-            send(cl_fd, encrypted, MESSAGE_BUFFER_SIZE, 0);
+            int length = encrypt(msg, key, iv, packet.data);
+            packet.length = length;
+            send(cl_fd, &packet, sizeof(packet), 0);
 
             if (strcmp(msg, "/quit") == 0)
             {
@@ -121,12 +125,13 @@ static void exchange_keys(int cl_fd)
 
 static void share_names(int cl_fd)
 {
-    aes_t cl_name_enc[MESSAGE_BUFFER_SIZE] = {};
-    recv(cl_fd, cl_name_enc, MESSAGE_BUFFER_SIZE, 0);
-    strncpy(cl_name, decrypt(cl_name_enc, key, iv), NAME_LEN-1);
+    struct packet packet;
+    recv(cl_fd, &packet, sizeof(packet), 0);
+    int length = decrypt(packet.data, packet.length, key, iv, cl_name);
 
-    aes_t *sv_name_enc = encrypt(sv_name, key, iv);
-    send(cl_fd, sv_name_enc, MESSAGE_BUFFER_SIZE, 0);
+    length = encrypt(sv_name, key, iv, packet.data);
+    packet.length = length;
+    send(cl_fd, &packet, sizeof(packet), 0);
 }
 
 void server(char nick[64])

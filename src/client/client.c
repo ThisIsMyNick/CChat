@@ -41,12 +41,13 @@ static void exchange_keys(int sv_fd)
 
 static void share_names(int cl_fd)
 {
-    aes_t *cl_name_enc = encrypt(cl_name, key, iv);
-    send(cl_fd, cl_name_enc, MESSAGE_BUFFER_SIZE, 0);
+    struct packet packet;
+    int length = encrypt(cl_name, key, iv, packet.data);
+    packet.length = length;
+    send(cl_fd, &packet, sizeof(packet), 0);
 
-    aes_t sv_name_enc[MESSAGE_BUFFER_SIZE] = {};
-    recv(cl_fd, sv_name_enc, MESSAGE_BUFFER_SIZE, 0);
-    strncpy(sv_name, decrypt(sv_name_enc, key, iv), NAME_LEN-1);
+    recv(cl_fd, &packet, sizeof(packet), -1);
+    length = decrypt(packet.data, packet.length, key, iv, sv_name);
 }
 
 static int sock_setup(char sv_nameaddr[64])
@@ -79,13 +80,15 @@ static void *input(void *args)
     struct argl *arg = (struct argl*)args;
     msgs_data *d = arg->d;
     int sv_fd = arg->sv_fd;
+
+    struct packet packet;
     while (1)
     {
-        aes_t response[MESSAGE_BUFFER_SIZE] = {};
-        int nbytes = recv(sv_fd, response, sizeof(response), 0);
+        int nbytes = recv(sv_fd, &packet, sizeof(packet), 0);
         if (nbytes && nbytes != -1)
         {
-            char *decrypted = decrypt(response, key, iv);
+            char decrypted[MESSAGE_BUFFER_SIZE] = {};
+            int length = decrypt(packet.data, packet.length, key, iv, decrypted);
             if (strcmp(decrypted, "/quit") == 0)
             {
                 pthread_mutex_lock(&msg_mutex);
@@ -129,6 +132,8 @@ void client(char sv_nameaddr[64], char nick[64])
     pthread_t input_thread;//, output_thread;
     pthread_create(&input_thread, NULL, input, (void*)&args);
 
+    struct packet packet;
+
     while (!quit_condition)
     {
         update_window(&d);
@@ -137,8 +142,9 @@ void client(char sv_nameaddr[64], char nick[64])
         if (msg && *msg)
         {
             msg[strcspn(msg, "\n")] = 0;
-            aes_t *encrypted = encrypt(msg, key, iv);
-            send(sv_fd, encrypted, MESSAGE_BUFFER_SIZE, 0);
+            int length = encrypt(msg, key, iv, packet.data);
+            packet.length = length;
+            send(sv_fd, &packet, sizeof(packet), 0);
 
             if (strcmp(msg, "/quit") == 0)
             {

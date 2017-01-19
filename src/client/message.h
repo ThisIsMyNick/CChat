@@ -2,6 +2,12 @@
 #define MESSAGE_BUFFER_SIZE 1024
 #define NAME_LEN 21
 
+typedef struct packet
+{
+    char data[MESSAGE_BUFFER_SIZE];
+    int length;
+} packet;
+
 typedef struct msg
 {
     char *timestamp;
