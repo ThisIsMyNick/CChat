@@ -46,7 +46,7 @@ static void share_names(int cl_fd)
     packet.length = length;
     send(cl_fd, &packet, sizeof(packet), 0);
 
-    recv(cl_fd, &packet, sizeof(packet), -1);
+    recv(cl_fd, &packet, sizeof(packet), 0);
     length = decrypt(packet.data, packet.length, key, iv, sv_name);
 }
 
