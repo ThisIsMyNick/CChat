@@ -48,6 +48,10 @@ static void share_names(int cl_fd)
 
     recv(cl_fd, &packet, sizeof(packet), 0);
     length = decrypt(packet.data, packet.length, key, iv, sv_name);
+    if (length == -1) {
+        fprintf(stderr, "Failed to decrypt server name.\n");
+        exit(1);
+    }
 }
 
 static int sock_setup(char sv_nameaddr[64])
@@ -89,6 +93,12 @@ static void *input(void *args)
         {
             char decrypted[MESSAGE_BUFFER_SIZE] = {};
             int length = decrypt(packet.data, packet.length, key, iv, decrypted);
+            if (length == -1) {
+                pthread_mutex_lock(&msg_mutex);
+                add_msg(d, "CChat", "Decryption failed.");
+                pthread_mutex_unlock(&msg_mutex);
+                continue;
+            }
             if (strcmp(decrypted, "/quit") == 0)
             {
                 pthread_mutex_lock(&msg_mutex);

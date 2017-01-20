@@ -51,6 +51,12 @@ static void *input(void *args)
         {
             char decrypted[MESSAGE_BUFFER_SIZE] = {};
             int length = decrypt(packet.data, packet.length, key, iv, decrypted);
+            if (length == -1) {
+                pthread_mutex_lock(&msg_mutex);
+                add_msg(d, "CChat", "Decryption failed.");
+                pthread_mutex_unlock(&msg_mutex);
+                continue;
+            }
             if (strcmp(decrypted, "/quit") == 0)
             {
                 pthread_mutex_lock(&msg_mutex);
@@ -128,6 +134,9 @@ static void share_names(int cl_fd)
     struct packet packet;
     recv(cl_fd, &packet, sizeof(packet), 0);
     int length = decrypt(packet.data, packet.length, key, iv, cl_name);
+    if (length == -1) {
+        fprintf(stderr, "Failed to decrypt client name.\n");
+    }
 
     length = encrypt(sv_name, key, iv, packet.data);
     packet.length = length;
