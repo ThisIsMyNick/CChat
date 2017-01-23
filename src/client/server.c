@@ -23,7 +23,7 @@ static char cl_name[NAME_LEN] = {};
 static int quit_condition = 0;
 static pthread_mutex_t msg_mutex;
 
-aes_t key[KEY_SIZE]
+aes_t key[KEY_SIZE];
 aes_t iv[KEY_SIZE];
 
 struct argl

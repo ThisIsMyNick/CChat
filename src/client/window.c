@@ -58,7 +58,7 @@ void draw_prompt()
 void clear_msgs()
 {
     int i;
-    for (i = 1; i < max_y-3; ++i)
+    for (i = 1; i < max_y-2; ++i)
     {
         move(i,0);
         clrtoeol();
