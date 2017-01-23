@@ -80,9 +80,9 @@ static void share_names(int cl_fd)
 static int sock_setup(char sv_nameaddr[64])
 {
     int sockfd;
-    struct sockaddr_in6 sv_addr;
+    struct sockaddr_in sv_addr;
 
-    sockfd = socket(AF_INET6, SOCK_STREAM, 0);
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1)
     {
         fprintf(stderr, "Failed to set up socket: %s\n", strerror(errno));
@@ -90,13 +90,13 @@ static int sock_setup(char sv_nameaddr[64])
     }
 
     bzero(&sv_addr, sizeof(sv_addr));
-    sv_addr.sin6_family = AF_INET6;
-    if (inet_pton(AF_INET6, sv_nameaddr, &(sv_addr.sin6_addr)) == -1)
+    sv_addr.sin_family = AF_INET;
+    if (inet_pton(AF_INET, sv_nameaddr, &(sv_addr.sin_addr)) == -1)
     {
         fprintf(stderr, "Bad host name: %s\n", strerror(errno));
         exit(1);
     }
-    sv_addr.sin6_port = htons(PORT);
+    sv_addr.sin_port = htons(PORT);
 
     if (connect(sockfd, (struct sockaddr*)&sv_addr, sizeof(sv_addr)) == -1)
     {
