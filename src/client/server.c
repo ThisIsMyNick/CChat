@@ -99,7 +99,7 @@ void serve(int cl_fd)
         update_window(&d);
         char msg[256] = {};
         get_input(msg);
-        if (msg && *msg)
+        if (*msg)
         {
             int length = encrypt(msg, key, iv, packet.data);
             packet.length = length;

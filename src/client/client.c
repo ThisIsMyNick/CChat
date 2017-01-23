@@ -160,7 +160,7 @@ void client(char sv_nameaddr[64], char nick[64])
         update_window(&d);
         char msg[256] = {};
         get_input(msg);
-        if (msg && *msg)
+        if (*msg)
         {
             msg[strcspn(msg, "\n")] = 0;
             int length = encrypt(msg, key, iv, packet.data);
