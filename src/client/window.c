@@ -57,7 +57,8 @@ void draw_messages(msg *msg_list, int length, int display_to)
 /*
  * Get the maximum x coordinate of the screen
  */
-int get_max_x() {
+int get_max_x()
+{
     return max_x;
 }
 
