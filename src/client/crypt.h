@@ -5,5 +5,5 @@
 typedef unsigned char aes_t;
 
 void generate_bytes(aes_t *buf);
-int encrypt(aes_t *plaintext, aes_t *key, aes_t *iv, aes_t *ciphertext);
-int decrypt(aes_t *ciphertext, int ciphertext_len, aes_t *key, aes_t *iv, aes_t *plaintext);
+int encrypt(char *plaintext, aes_t *key, aes_t *iv, aes_t *ciphertext);
+int decrypt(aes_t *ciphertext, int ciphertext_len, aes_t *key, aes_t *iv, char *plaintext);

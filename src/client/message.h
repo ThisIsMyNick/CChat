@@ -4,7 +4,7 @@
 
 typedef struct packet
 {
-    char data[MESSAGE_BUFFER_SIZE];
+    unsigned char data[MESSAGE_BUFFER_SIZE];
     int length;
 } packet;
 
