@@ -131,7 +131,7 @@ void client(char sv_nameaddr[64], char nick[64])
 
     msgs_data d;
     d.curr = 0;
-    d.size = 100;
+    d.size = 10;
     d.msg_list = calloc(d.size, sizeof(msg));
 
     init_window();

@@ -16,10 +16,10 @@
  */
 void add_msg(msgs_data *d, char *user, char *content)
 {
-    if (d->size == d->curr)
+    if (d->size-1 == d->curr)
     {
-        d->msg_list = realloc(d->msg_list, (int)(d->size*1.6)*sizeof(char));
-        d->size = (int)(d->size*1.6);
+        d->size *= 2;
+        d->msg_list = realloc(d->msg_list, d->size*sizeof(msg));
     }
     d->msg_list[d->curr].timestamp = calloc(9, sizeof(char));
 
