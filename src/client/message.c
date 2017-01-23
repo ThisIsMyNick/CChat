@@ -4,6 +4,7 @@
 #include <time.h>
 
 #include "message.h"
+#include "window.h"
 
 /*
  * add_msg - Add a message to list
@@ -31,7 +32,8 @@ void add_msg(msgs_data *d, char *user, char *content)
     strncpy(d->msg_list[d->curr].user, user, 10);
     d->msg_list[d->curr].content = calloc(256, sizeof(char));
     strncpy(d->msg_list[d->curr].content, content, 255);
-    d->msg_list[d->curr].lines = 1;
+    int len = snprintf(NULL, 0, "[%s] | <%s> %s", d->msg_list[d->curr].timestamp, d->msg_list[d->curr].user, d->msg_list[d->curr].content);
+    d->msg_list[d->curr].lines = (len / get_max_x()) + 1;
 
     d->curr++;
 }

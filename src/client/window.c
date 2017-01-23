@@ -25,7 +25,7 @@ void draw_messages(msg *msg_list, int length, int display_to)
     int i = display_to;
     while (i >= 0)
     {
-        if (lines+msg_list[i].lines <= max_y-3)
+        if (lines+msg_list[i].lines < max_y-2)
         {
             lines += msg_list[i].lines;
             starti = i;
@@ -35,21 +35,16 @@ void draw_messages(msg *msg_list, int length, int display_to)
         i--;
     }
 
-    int max_user_len = 0;
-    for (i = starti; i < length; ++i)
+    int x = starti;
+    i = starti;
+    for (;i < length; x+=msg_list[i].lines, i++)
     {
-        int len;
-        if ((len = strlen(msg_list[i].user)) > max_user_len)
-            max_user_len = len;
+        mvprintw(x+1-starti, 0, "[%s] | <%s> %s", msg_list[i].timestamp, msg_list[i].user, msg_list[i].content);
     }
+}
 
-    for (i = starti; i < length; i+=msg_list[i].lines)
-    {
-        char line[2048];
-        sprintf(line, "[%s] %*s | %s", msg_list[i].timestamp, max_user_len, msg_list[i].user, msg_list[i].content);
-        msg_list[i].lines = (strlen(line) / max_x) + 1;
-        mvprintw(i+1-starti, 0, "%s", line);
-    }
+int get_max_x() {
+    return max_x;
 }
 
 void draw_prompt()
@@ -70,6 +65,7 @@ void clear_msgs()
 
 void update_window(msgs_data *d)
 {
+    getmaxyx(stdscr, max_y, max_x); // re-calculate maxyx in case the window size changed
     int x,y;
     getyx(input_win, y, x);
     clear_msgs();
