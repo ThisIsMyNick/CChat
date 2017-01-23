@@ -43,9 +43,12 @@ void draw_messages(msg *msg_list, int length, int display_to)
             max_user_len = len;
     }
 
-    for (i = starti; i < length; ++i)
+    for (i = starti; i < length; i+=msg_list[i].lines)
     {
-        mvprintw(i+1-starti, 0, "[%s] %*s | %s", msg_list[i].timestamp, max_user_len,  msg_list[i].user, msg_list[i].content);
+        char line[2048];
+        sprintf(line, "[%s] %*s | %s", msg_list[i].timestamp, max_user_len, msg_list[i].user, msg_list[i].content);
+        msg_list[i].lines = (strlen(line) / max_x) + 1;
+        mvprintw(i+1-starti, 0, "%s", line);
     }
 }
 
