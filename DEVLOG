@@ -2,3 +2,8 @@
            Nobel: Add simple turn-by-turn socket communication
 2016-12-21 Nobel: ncurses prototype.
 2016-12-27 James: Add end-to-end encryption
+2017-01-03 Nobel: Add notifications for unread messages
+2017-01-06 James: Display message timestamps
+2017-01-12 Nobel: Add proper line scrolling/clearing
+2017-01-18 Nobel: Fix bug where receiving message reset cursor position
+2017-01-19 James: Refactor encryption functions to use OpenSSL's EVP functions
