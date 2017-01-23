@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <pthread.h>
@@ -151,13 +152,25 @@ void server(char nick[64])
     struct sockaddr_in6 sv_addr, cl_addr;
 
     sockfd = socket(AF_INET6, SOCK_STREAM, 0);
+    if (sockfd == -1) {
+        fprintf(stderr, "Failed to set up socket: %s\n", strerror(errno));
+        exit(1);
+    }
+
     bzero(&sv_addr, sizeof(sv_addr));
     sv_addr.sin6_family = AF_INET6;
     sv_addr.sin6_addr = in6addr_any;
     sv_addr.sin6_port = htons(PORT);
 
-    bind(sockfd, (struct sockaddr*)&sv_addr, sizeof(sv_addr));
-    listen(sockfd, 5);
+    if (bind(sockfd, (struct sockaddr*)&sv_addr, sizeof(sv_addr)) == -1) {
+        fprintf(stderr, "Failed to bind port: %s\n", strerror(errno));
+        exit(1);
+    }
+
+    if (listen(sockfd, 5) == -1) {
+        fprintf(stderr, "Failed to listen: %s\n", strerror(errno));
+        exit(1);
+    }
 
     while (1)
     {
