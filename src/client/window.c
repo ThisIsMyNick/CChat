@@ -12,11 +12,22 @@
 WINDOW *input_win;
 int max_x, max_y;
 
+/*
+ * Render the title bar
+ */
 void title_bar()
 {
     mvprintw(0,0, "CChat");
 }
 
+/*
+ * Draw messages onto the screen
+ *
+ * Params:
+ * msg *msg_list: List of messages to be drawn
+ * int length: Number of messages to draw
+ * int display_to: Index of the last message to draw
+ */
 void draw_messages(msg *msg_list, int length, int display_to)
 {
     int lines = 0;
@@ -43,16 +54,25 @@ void draw_messages(msg *msg_list, int length, int display_to)
     }
 }
 
+/*
+ * Get the maximum x coordinate of the screen
+ */
 int get_max_x() {
     return max_x;
 }
 
+/*
+ * Draw the input prompt
+ */
 void draw_prompt()
 {
     mvwprintw(input_win, 0, 0, "[Prompt] ");
     wrefresh(input_win);
 }
 
+/*
+ * Clear the screen of all messages
+ */
 void clear_msgs()
 {
     int i;
@@ -63,6 +83,9 @@ void clear_msgs()
     }
 }
 
+/*
+ * Update the screen, redrawing messages and the prompt
+ */
 void update_window(msgs_data *d)
 {
     getmaxyx(stdscr, max_y, max_x); // re-calculate maxyx in case the window size changed
@@ -77,6 +100,12 @@ void update_window(msgs_data *d)
 
 }
 
+/*
+ * Get input from the prompt window
+ *
+ * Params:
+ * char *dst: Char array used to store the input
+ */
 void get_input(char *dst)
 {
     draw_prompt(); //to set position
@@ -84,6 +113,9 @@ void get_input(char *dst)
     mvwprintw(input_win, 0, 0, "%*s", max_x, " ");
 }
 
+/*
+ * Creates the initial display of the window
+ */
 void init_window()
 {
     initscr();
@@ -99,6 +131,9 @@ void init_window()
     wrefresh(input_win);
 }
 
+/*
+ * Closes the screen and removes both the main and input windows
+ */
 void close_window()
 {
     endwin();
