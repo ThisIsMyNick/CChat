@@ -54,6 +54,7 @@ static void share_names(int cl_fd)
     if (length == -1)
     {
         fprintf(stderr, "Failed to decrypt client name.\n");
+        exit(1);
     }
 
     length = encrypt(sv_name, key, iv, packet.data);
