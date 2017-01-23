@@ -17,7 +17,7 @@ Then to start a server:
 
 To start a client:
 
-`$ ./cchat -n clientname -s serverip`
+`$ ./cchat -n clientname -c serverip`
 
 For example, running a local server and client can be done as such:
 
