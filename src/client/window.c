@@ -50,7 +50,7 @@ void draw_messages(msg *msg_list, int length, int display_to)
     i = starti;
     for (;i < length; x+=msg_list[i].lines, i++)
     {
-        mvprintw(x+1-starti, 0, "[%s] | <%s> %s", msg_list[i].timestamp, msg_list[i].user, msg_list[i].content);
+        mvprintw(x+1-starti, 0, "[%s] <%s> %s", msg_list[i].timestamp, msg_list[i].user, msg_list[i].content);
     }
 }
 
