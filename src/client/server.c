@@ -201,13 +201,9 @@ void server(char nick[64])
     {
         socklen_t cl_len;
         int cl_fd = accept(sockfd, (struct sockaddr*)&cl_addr, &cl_len);
-        if (fork() == 0)
-        {
-            printf("Connection established.\n");
-            exchange_keys(cl_fd);
-            share_names(cl_fd);
-            serve(cl_fd);
-            exit(0);
-        }
+        printf("Connection established.\n");
+        exchange_keys(cl_fd);
+        share_names(cl_fd);
+        serve(cl_fd);
     }
 }

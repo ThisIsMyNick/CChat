@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
                 break;
             case 'c':
                 strncpy(sv_nameaddr, optarg, 64);
-                printf("Connect to server at %s\n", sv_nameaddr);
+                printf("Connecting to %s\n", sv_nameaddr);
                 break;
             case 'n':
                 strncpy(nick, optarg, 64);
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 
     if (!*nick)
     {
-        printf("Please specify nick.\n");
+        printf("Please specify a nickname.\n");
         help_exit();
     }
 
