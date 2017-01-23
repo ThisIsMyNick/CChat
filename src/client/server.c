@@ -12,9 +12,9 @@
 
 #include "crypt.h"
 #include "message.h"
+#include "notify.h"
 #include "server.h"
 #include "window.h"
-#include "notify.h"
 
 extern int PORT;
 static char sv_name[NAME_LEN] = {};
@@ -23,7 +23,14 @@ static char cl_name[NAME_LEN] = {};
 static int quit_condition = 0;
 static pthread_mutex_t msg_mutex;
 
-aes_t key[KEY_SIZE], iv[KEY_SIZE];
+aes_t key[KEY_SIZE]
+aes_t iv[KEY_SIZE];
+
+struct argl
+{
+    msgs_data *d;
+    int cl_fd;
+};
 
 static void debuglog(char *s)
 {
@@ -31,12 +38,6 @@ static void debuglog(char *s)
     write(fd, s, strlen(s));
     close(fd);
 }
-
-struct argl
-{
-    msgs_data *d;
-    int cl_fd;
-};
 
 static void *input(void *args)
 {
@@ -52,7 +53,8 @@ static void *input(void *args)
         {
             char decrypted[MESSAGE_BUFFER_SIZE] = {};
             int length = decrypt(packet.data, packet.length, key, iv, decrypted);
-            if (length == -1) {
+            if (length == -1)
+            {
                 pthread_mutex_lock(&msg_mutex);
                 add_msg(d, "CChat", "Decryption failed.");
                 pthread_mutex_unlock(&msg_mutex);
@@ -135,7 +137,8 @@ static void share_names(int cl_fd)
     struct packet packet;
     recv(cl_fd, &packet, sizeof(packet), 0);
     int length = decrypt(packet.data, packet.length, key, iv, cl_name);
-    if (length == -1) {
+    if (length == -1)
+    {
         fprintf(stderr, "Failed to decrypt client name.\n");
     }
 
@@ -152,7 +155,8 @@ void server(char nick[64])
     struct sockaddr_in6 sv_addr, cl_addr;
 
     sockfd = socket(AF_INET6, SOCK_STREAM, 0);
-    if (sockfd == -1) {
+    if (sockfd == -1)
+    {
         fprintf(stderr, "Failed to set up socket: %s\n", strerror(errno));
         exit(1);
     }
@@ -162,12 +166,14 @@ void server(char nick[64])
     sv_addr.sin6_addr = in6addr_any;
     sv_addr.sin6_port = htons(PORT);
 
-    if (bind(sockfd, (struct sockaddr*)&sv_addr, sizeof(sv_addr)) == -1) {
+    if (bind(sockfd, (struct sockaddr*)&sv_addr, sizeof(sv_addr)) == -1)
+    {
         fprintf(stderr, "Failed to bind port: %s\n", strerror(errno));
         exit(1);
     }
 
-    if (listen(sockfd, 5) == -1) {
+    if (listen(sockfd, 5) == -1)
+    {
         fprintf(stderr, "Failed to listen: %s\n", strerror(errno));
         exit(1);
     }

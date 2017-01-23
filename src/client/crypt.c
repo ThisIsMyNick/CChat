@@ -8,13 +8,14 @@
 
 typedef unsigned char aes_t;
 
-void generate_bytes(aes_t *buf) {
-    if (!RAND_bytes(buf, sizeof(buf))) {
+void generate_bytes(aes_t *buf)
+{
+    if (!RAND_bytes(buf, sizeof(buf)))
         fprintf(stderr, "[!] Could not generate key");
-    }
 }
 
-int encrypt(char *plaintext, aes_t *key, aes_t *iv, aes_t *ciphertext) {
+int encrypt(char *plaintext, aes_t *key, aes_t *iv, aes_t *ciphertext)
+{
     EVP_CIPHER_CTX *ctx;
     int len = 0;
     int ciphertext_len = 0;
@@ -35,7 +36,8 @@ int encrypt(char *plaintext, aes_t *key, aes_t *iv, aes_t *ciphertext) {
     return ciphertext_len;
 }
 
-int decrypt(aes_t *ciphertext, int ciphertext_len, aes_t *key, aes_t *iv, char *plaintext) {
+int decrypt(aes_t *ciphertext, int ciphertext_len, aes_t *key, aes_t *iv, char *plaintext)
+{
     EVP_CIPHER_CTX *ctx;
     int len = 0;
     int plaintext_len = 0;
@@ -51,7 +53,8 @@ int decrypt(aes_t *ciphertext, int ciphertext_len, aes_t *key, aes_t *iv, char *
     status = EVP_DecryptFinal_ex(ctx, (aes_t *)plaintext + len, &len);
     EVP_CIPHER_CTX_free(ctx);
 
-    if (status > 0) {
+    if (status > 0)
+    {
         plaintext_len += len;
         plaintext[plaintext_len] = 0;
         return plaintext_len;

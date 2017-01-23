@@ -87,7 +87,7 @@ void get_input(char *dst)
 
 void init_window()
 {
-    initscr(); //Message display
+    initscr();
 
     getmaxyx(stdscr, max_y, max_x);
     input_win = newwin(1,max_x, max_y-2,0);

@@ -1,3 +1,4 @@
+#include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <netdb.h>
@@ -10,13 +11,12 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <arpa/inet.h>
 
 #include "client.h"
 #include "crypt.h"
 #include "message.h"
-#include "window.h"
 #include "notify.h"
+#include "window.h"
 
 extern int PORT;
 static char sv_name[NAME_LEN] = {};
@@ -25,7 +25,8 @@ static char cl_name[NAME_LEN] = {};
 static int quit_condition = 0;
 static pthread_mutex_t msg_mutex;
 
-aes_t key[KEY_SIZE], iv[KEY_SIZE];
+aes_t key[KEY_SIZE];
+aes_t iv[KEY_SIZE];
 
 static void debuglog(char *s)
 {
@@ -61,20 +62,23 @@ static int sock_setup(char sv_nameaddr[64])
     struct sockaddr_in6 sv_addr;
 
     sockfd = socket(AF_INET6, SOCK_STREAM, 0);
-    if (sockfd == -1) {
+    if (sockfd == -1)
+    {
         fprintf(stderr, "Failed to set up socket: %s\n", strerror(errno));
         exit(1);
     }
 
     bzero(&sv_addr, sizeof(sv_addr));
     sv_addr.sin6_family = AF_INET6;
-    if (inet_pton(AF_INET6, sv_nameaddr, &(sv_addr.sin6_addr)) == -1) {
+    if (inet_pton(AF_INET6, sv_nameaddr, &(sv_addr.sin6_addr)) == -1)
+    {
         fprintf(stderr, "Bad host name: %s\n", strerror(errno));
         exit(1);
     }
     sv_addr.sin6_port = htons(PORT);
 
-    if (connect(sockfd, (struct sockaddr*)&sv_addr, sizeof(sv_addr)) == -1) {
+    if (connect(sockfd, (struct sockaddr*)&sv_addr, sizeof(sv_addr)) == -1)
+    {
         fprintf(stderr, "Could not connect to server.\n");
         exit(1);
     }
@@ -104,7 +108,8 @@ static void *input(void *args)
         {
             char decrypted[MESSAGE_BUFFER_SIZE] = {};
             int length = decrypt(packet.data, packet.length, key, iv, decrypted);
-            if (length == -1) {
+            if (length == -1)
+            {
                 pthread_mutex_lock(&msg_mutex);
                 add_msg(d, "CChat", "Decryption failed.");
                 pthread_mutex_unlock(&msg_mutex);
@@ -150,7 +155,7 @@ void client(char sv_nameaddr[64], char nick[64])
     struct argl args;
     args.d = &d;
     args.sv_fd = sv_fd;
-    pthread_t input_thread;//, output_thread;
+    pthread_t input_thread;
     pthread_create(&input_thread, NULL, input, (void*)&args);
 
     struct packet packet;
