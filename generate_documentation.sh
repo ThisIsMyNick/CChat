@@ -5,7 +5,7 @@ mv README.md.tmp README.md
 
 last=$(git rev-parse HEAD)
 short=$(git log --pretty=format:'%h' -n 1)
-echo -e "Documentation is taken directly from the source. Last updated for [$short](https://github.com/ThisIsMyNick/CChat/commit/$last)\n" >> README.md
+echo -e "Documentation is taken directly from the source. Run `./generate_documentation.sh` to generate the documentation." >> README.md
 
 for file in src/client/*.c; do
     {

@@ -28,7 +28,7 @@ Then on another terminal
 `$ ./cchat -n cliento -c 127.0.0.1`
 
 ## Documentation
-Documentation is taken directly from the source. Last updated for [1d29155](https://github.com/ThisIsMyNick/CChat/commit/1d2915532d1e0c76f2a79f2a2bd10ddbd6d1447f)
+Documentation is taken directly from the source. Last updated for [5090e10](https://github.com/ThisIsMyNick/CChat/commit/5090e103f041821789ce584f55efb72c67aec52e)
 
 src/client/client.c:
 ```C
@@ -211,6 +211,7 @@ void draw_messages(msg *msg_list, int length, int display_to);
  * Get the maximum x coordinate of the screen
  */
 int get_max_x();
+
 /*
  * Draw the input prompt
  */
