@@ -26,19 +26,46 @@ static pthread_mutex_t msg_mutex;
 aes_t key[KEY_SIZE];
 aes_t iv[KEY_SIZE];
 
+// Passed into the worker function in the listening thread
 struct argl
 {
     msgs_data *d;
     int cl_fd;
 };
 
-static void debuglog(char *s)
+/*
+ * Reads the AES key and initialization vector from the client
+ * to set up end-to-end encryption
+ */
+static void exchange_keys(int cl_fd)
 {
-    int fd = open("log", O_CREAT|O_WRONLY|O_APPEND);
-    write(fd, s, strlen(s));
-    close(fd);
+    recv(cl_fd, key, sizeof(key), 0);
+    recv(cl_fd, iv, sizeof(iv), 0);
 }
 
+/*
+ * Share server name with the client, and receive the client's name
+ */
+static void share_names(int cl_fd)
+{
+    struct packet packet;
+    recv(cl_fd, &packet, sizeof(packet), 0);
+    int length = decrypt(packet.data, packet.length, key, iv, cl_name);
+    if (length == -1)
+    {
+        fprintf(stderr, "Failed to decrypt client name.\n");
+    }
+
+    length = encrypt(sv_name, key, iv, packet.data);
+    packet.length = length;
+    send(cl_fd, &packet, sizeof(packet), 0);
+}
+
+
+/*
+ * Worker function that constantly listens for a message from a client
+ * Meant to be run in a thread
+ */
 static void *input(void *args)
 {
     struct argl *arg = (struct argl*)args;
@@ -81,6 +108,12 @@ static void *input(void *args)
     return 0;
 }
 
+/*
+ * Handles the server loop for a specific client
+ *
+ * Params:
+ * int cl_fd: File descriptor of the client to be served
+ */
 void serve(int cl_fd)
 {
     msgs_data d;
@@ -126,27 +159,12 @@ void serve(int cl_fd)
     printf("Connection closed.\n");
 }
 
-static void exchange_keys(int cl_fd)
-{
-    recv(cl_fd, key, sizeof(key), 0);
-    recv(cl_fd, iv, sizeof(iv), 0);
-}
-
-static void share_names(int cl_fd)
-{
-    struct packet packet;
-    recv(cl_fd, &packet, sizeof(packet), 0);
-    int length = decrypt(packet.data, packet.length, key, iv, cl_name);
-    if (length == -1)
-    {
-        fprintf(stderr, "Failed to decrypt client name.\n");
-    }
-
-    length = encrypt(sv_name, key, iv, packet.data);
-    packet.length = length;
-    send(cl_fd, &packet, sizeof(packet), 0);
-}
-
+/*
+ * Runs the server loop
+ *
+ * Params:
+ * char nick[64]: Server nickname
+ */
 void server(char nick[64])
 {
     strncpy(sv_name, nick, NAME_LEN-1);

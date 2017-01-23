@@ -5,6 +5,10 @@
 #include "notify.h"
 #include "message.h"
 
+/*
+ * Displays a notification using notify-send and xprop
+ * Only tested on Ubuntu
+ */
 void notify(msgs_data *d)
 {
     const char *disp = getenv("DISPLAY");

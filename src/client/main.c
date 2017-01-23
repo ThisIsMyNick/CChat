@@ -9,6 +9,9 @@
 
 int PORT = 31337;
 
+/*
+ * Prints the help string
+ */
 void help_exit()
 {
     printf("Usage:\n"
@@ -16,6 +19,10 @@ void help_exit()
     exit(1);
 }
 
+/*
+ * Top-level function that gets run by the users. Parses arguments and runs
+ * the server or client accordingly.
+ */
 int main(int argc, char *argv[])
 {
     char nick[64] = {};

@@ -28,19 +28,32 @@ static pthread_mutex_t msg_mutex;
 aes_t key[KEY_SIZE];
 aes_t iv[KEY_SIZE];
 
-static void debuglog(char *s)
+// Passed into the worker function in the listening thread
+struct argl
 {
-    int fd = open("log", O_CREAT|O_WRONLY|O_APPEND);
-    write(fd, s, strlen(s));
-    close(fd);
-}
+    msgs_data *d;
+    int sv_fd;
+};
 
+/*
+ * Sends over the AES key and initialization vector to the server
+ * to set up end-to-end encryption
+ *
+ * Params:
+ * int sv_fd: File descriptor of the server to share the keys with
+ */
 static void exchange_keys(int sv_fd)
 {
     send(sv_fd, key, sizeof(key), 0);
     send(sv_fd, iv, sizeof(iv), 0);
 }
 
+/*
+ * Share client name with the server, and receive the server's name
+ *
+ * Params:
+ * int cl_fd: File descriptor of the server to share the names with
+ */
 static void share_names(int cl_fd)
 {
     struct packet packet;
@@ -56,6 +69,14 @@ static void share_names(int cl_fd)
     }
 }
 
+/*
+ * Connects to the server at the address sv_nameaddr and shares keys and names
+ *
+ * Params:
+ * char sv_nameaddr[64]: The address of the server, represented as a string
+ *
+ * Returns the file descriptor for the server socket
+ */
 static int sock_setup(char sv_nameaddr[64])
 {
     int sockfd;
@@ -88,12 +109,13 @@ static int sock_setup(char sv_nameaddr[64])
     return sockfd;
 }
 
-struct argl
-{
-    msgs_data *d;
-    int sv_fd;
-};
-
+/*
+ * Worker function that constantly listens for a message from the server
+ * Meant to be run in a thread
+ *
+ * Params:
+ * void *args: Struct containing the arguments server file descriptor and the list of messages
+ */
 static void *input(void *args)
 {
     struct argl *arg = (struct argl*)args;
@@ -136,6 +158,13 @@ static void *input(void *args)
     return 0;
 }
 
+/*
+ * Runs the client loop
+ *
+ * Params:
+ * char sv_nameaddr[64]: Server address represented as a string
+ * char nick[64]: The client nickname
+ */
 void client(char sv_nameaddr[64], char nick[64])
 {
     strncpy(cl_name, nick, NAME_LEN-1);
@@ -147,7 +176,7 @@ void client(char sv_nameaddr[64], char nick[64])
 
     msgs_data d;
     d.curr = 0;
-    d.size = 10;
+    d.size = 10; // Initially holds 10 messages
     d.msg_list = calloc(d.size, sizeof(msg));
 
     init_window();
@@ -155,6 +184,7 @@ void client(char sv_nameaddr[64], char nick[64])
     struct argl args;
     args.d = &d;
     args.sv_fd = sv_fd;
+
     pthread_t input_thread;
     pthread_create(&input_thread, NULL, input, (void*)&args);
 

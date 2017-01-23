@@ -7,7 +7,7 @@
 #include "window.h"
 
 /*
- * add_msg - Add a message to list
+ * Add a message to the list of messages
  *
  * msg *m - Message list to modify (must be malloc'd)
  * int *m_size - Capacity of message list
@@ -17,6 +17,7 @@
  */
 void add_msg(msgs_data *d, char *user, char *content)
 {
+    // Reallocate memory if necessary
     if (d->size-1 == d->curr)
     {
         d->size *= 2;
@@ -38,6 +39,9 @@ void add_msg(msgs_data *d, char *user, char *content)
     d->curr++;
 }
 
+/*
+ * Frees the msgs_data struct and everything in it
+ */
 void free_msgs(msgs_data *d)
 {
     int i;
