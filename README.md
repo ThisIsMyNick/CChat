@@ -31,9 +31,7 @@ If you want to quit chatting, use the `/quit` command. Running `/quit` as the cl
 running it as the server will terminate the existing connection and continue listening for more connections.
 
 ## Bugs
-* Multi-line messages work fine until they have to scroll past the screen. Since messages are not actually
-broken up into separate lines, it takes a little bit for the message to scroll off the screen.
-* The resizing event is not handled within the application, so resizing the terminal will redisplay messages nor render the prompt correctly.
+* Does not support multiple clients simultaneously.
 
 ## Documentation
 Documentation is taken directly from the source. Run `./generate_documentation.sh` to generate the documentation.
