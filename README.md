@@ -28,8 +28,7 @@ Then on another terminal
 `$ ./cchat -n cliento -c 127.0.0.1`
 
 ## Documentation
-Documentation is taken directly from the source. Last updated for [5090e10](https://github.com/ThisIsMyNick/CChat/commit/5090e103f041821789ce584f55efb72c67aec52e)
-
+Documentation is taken directly from the source. Run `./generate_documentation.sh` to generate the documentation.
 src/client/client.c:
 ```C
 /*
