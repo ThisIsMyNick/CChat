@@ -27,6 +27,14 @@ Then on another terminal
 
 `$ ./cchat -n cliento -c 127.0.0.1`
 
+If you want to quit chatting, use the `/quit` command. Running `/quit` as the client will exit the program, but
+running it as the server will terminate the existing connection and continue listening for more connections.
+
+## Bugs
+* After the 13th message, the screen temporarily clears itself until another message is receieved
+* Multi-line messages work fine until they have to scroll past the screen. Since messages are not actually
+broken up into separate lines, it takes a little bit for the message to scroll off the screen.
+
 ## Documentation
 Documentation is taken directly from the source. Run `./generate_documentation.sh` to generate the documentation.
 src/client/client.c:

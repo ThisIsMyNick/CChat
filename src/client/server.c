@@ -199,6 +199,7 @@ void server(char nick[64])
 
     while (1)
     {
+        // Only allow one client to be connected at a time
         socklen_t cl_len;
         int cl_fd = accept(sockfd, (struct sockaddr*)&cl_addr, &cl_len);
         printf("Connection established.\n");
