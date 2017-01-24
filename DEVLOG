@@ -7,3 +7,4 @@
 2017-01-12 Nobel: Add proper line scrolling/clearing
 2017-01-18 Nobel: Fix bug where receiving message reset cursor position
 2017-01-19 James: Refactor encryption functions to use OpenSSL's EVP functions
+2017-01-23 James: Cleanups and bug fixes
