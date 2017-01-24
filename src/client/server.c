@@ -206,5 +206,7 @@ void server(char nick[64])
         exchange_keys(cl_fd);
         share_names(cl_fd);
         serve(cl_fd);
+        close(cl_fd);
     }
+    close(sockfd);
 }
