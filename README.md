@@ -31,7 +31,6 @@ If you want to quit chatting, use the `/quit` command. Running `/quit` as the cl
 running it as the server will terminate the existing connection and continue listening for more connections.
 
 ## Bugs
-* After the 13th message, the screen temporarily clears itself until another message is receieved
 * Multi-line messages work fine until they have to scroll past the screen. Since messages are not actually
 broken up into separate lines, it takes a little bit for the message to scroll off the screen.
 * The resizing event is not handled within the application, so resizing the terminal will redisplay messages nor render the prompt correctly.
