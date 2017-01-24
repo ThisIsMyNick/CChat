@@ -11,6 +11,8 @@
  */
 void notify(msgs_data *d)
 {
+    return;
+/*
     const char *disp = getenv("DISPLAY");
     if (!*disp)
         return;
@@ -34,4 +36,5 @@ void notify(msgs_data *d)
     snprintf(s, 256, "notify-send \"CChat - %s\"", d->msg_list[d->curr-1].user);
     system(s);
 #endif
+*/
 }

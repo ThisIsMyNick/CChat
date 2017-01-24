@@ -13,6 +13,7 @@ typedef struct msg
     char *timestamp;
     char *user;
     char *content;
+    char **plines;
     int lines;
 } msg;
 
